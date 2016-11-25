@@ -1,16 +1,20 @@
 CC=g++
 CFLAGS=-c -Wall -std=c++11
 LDFLAGS=
-SOURCES=  Misc.cc  Error.cc  String.cc  Terminal.cc  mossim.cc
-OBJECTS=$(SOURCES:.cc=.o)
+SOURCES=  Misc.cpp  Error.cpp  String.cpp  Terminal.cpp  mossim.cpp cpu.cpp
+INSTRUCTIONS= cpu.cpp
+OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=mossim
 
-all: $(SOURCES) $(EXECUTABLE)
+all: $(EXECUTABLE)
 
-$(EXECUTABLE): $(OBJECTS)
-	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
+mossim: 
+	$(CC) $(LDFLAGS) Misc.o Error.o String.o Terminal.o mossim.o cpu.o -o mossim
 
-.cc.o:
+#.cpp.o: 
+#	cd insrtuctions && $(CC) $(CFLAGS) $< -o $@
+
+.cpp.o:
 	$(CC) $(CFLAGS) $< -o $@
 
 clean:

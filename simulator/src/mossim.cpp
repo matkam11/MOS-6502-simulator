@@ -6,7 +6,7 @@
 #include "String.h"
 #include "Error.h"
 #include "Misc.h"
-
+#include "instructions/cpu.h"
 #define VERSION "0.01v"
 
 
@@ -56,7 +56,9 @@ void MainLoop()
 {
         // Activate signal handler
         //simulation_engine::Engine *esim = esim::Engine::getInstance();
-
+        uint16_t base_addr = 0;
+        cpu *m = new_cpu(base_addr);
+        m->mem[base_addr++] = (uint16_t) 10;
         // Simulation loop
         while (1/*!simulation_engine->hasFinished()*/)
         {
