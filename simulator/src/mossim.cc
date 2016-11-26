@@ -6,9 +6,8 @@
 #include "String.h"
 #include "Error.h"
 #include "Misc.h"
-
+#include "6502.h"
 #define VERSION "0.01v"
-
 
 void WelcomeMessage(std::ostream &os)
 {
@@ -56,7 +55,9 @@ void MainLoop()
 {
         // Activate signal handler
         //simulation_engine::Engine *esim = esim::Engine::getInstance();
-
+        uint16_t base_addr = 20;
+        Emulator emu(base_addr);
+        std::cout << emu.pc << std::endl;
         // Simulation loop
         while (1/*!simulation_engine->hasFinished()*/)
         {

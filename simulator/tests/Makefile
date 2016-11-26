@@ -17,19 +17,19 @@
 GTEST_DIR = deps
 
 # Where to find user code.
-USER_DIR = .
-
+USER_DIR = ../src
+TEST_DIR = .
 # Flags passed to the preprocessor.
 # Set Google Test's header directory as a system directory, such that
 # the compiler doesn't generate warnings in Google Test headers.
-CPPFLAGS += -isystem $(GTEST_DIR)/include
+CPPFLAGS += -isystem $(GTEST_DIR)/include -isystem $(USER_DIR)
 
 # Flags passed to the C++ compiler.
 CXXFLAGS += -g -Wall -Wextra -pthread
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
-TESTS = sample1_unittest
+TESTS = 6502_unittest
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
@@ -71,12 +71,12 @@ gtest_main.a : gtest-all.o gtest_main.o
 # gtest_main.a, depending on whether it defines its own main()
 # function.
 
-sample1.o : $(USER_DIR)/sample1.cc $(USER_DIR)/sample1.h $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/sample1.cc
+6502.o : $(USER_DIR)/6502.cc $(USER_DIR)/6502.h $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/6502.cc
 
-sample1_unittest.o : $(USER_DIR)/sample1_unittest.cc \
-                     $(USER_DIR)/sample1.h $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/sample1_unittest.cc
+6502_unittest.o : $(TEST_DIR)/6502_unittest.cc \
+                     $(USER_DIR)/6502.h $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(TEST_DIR)/6502_unittest.cc
 
-sample1_unittest : sample1.o sample1_unittest.o gtest_main.a
+6502_unittest : 6502.o 6502_unittest.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
