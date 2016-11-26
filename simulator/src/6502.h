@@ -5,6 +5,9 @@
 
 
 */
+#ifndef LIB_CPP_6502_H
+#define LIB_CPP_6502_H
+
 #define MEMORY_SIZE 65536
 #define STACK_START 0x0100
 
@@ -37,3 +40,5 @@ class Emulator {
     // the opcode of the last instruction run. for debugging only.
     uint8_t last_opcode;
 };
+
+#endif
