@@ -59,19 +59,17 @@ void MainLoop()
         //simulation_engine::Engine *esim = esim::Engine::getInstance();
         uint16_t base_addr = 0x1000;
         uint16_t i = base_addr;
-        uint8_t byte;
+        char byte;
         Emulator emu(base_addr);
         std::ifstream inputBinary;
         inputBinary.open("fibonacci", std::ios::in | std::ios::binary);
         while (inputBinary.good()) {
-            //std::cout << std::hex << i << std::endl;
-            inputBinary >> std::setw(2) >> std::setprecision(2) >> std::hex >> byte;
+            inputBinary.read(&byte,1);
+            //inputBinary >> std::setw(2) >> std::setprecision(2) >> std::hex >> byte;
             emu.WriteMem(i,byte);
-            std::cout << std::dec << (int) emu.mem[i] << std::endl; 
             i++;
         }
         inputBinary.close();
-        std::cout << emu.pc << std::endl;
         // Simulation loop
         while (1/*!simulation_engine->hasFinished()*/)
         {
