@@ -8,6 +8,7 @@
 #include "6502.h"
 #include <stdint.h>
 #include <cstring>
+#include "Error.h"
 
 Emulator::Emulator(uint16_t pc_start) {
 	pc = pc_start;
@@ -1012,19 +1013,19 @@ void Emulator::ExecuteInst_plp_x_sp()  //28", "SKIP", "SKIP", "SKIP")
 }
 
 
-void Emulator::ExecuteInst_sty_zp()  //86", "SKIP", "REG", "SKIP")
+void Emulator::ExecuteInst_stx_zp()  //86", "SKIP", "REG", "SKIP")
 {
 	throw misc::Panic("Unimplemented instruction");
 }
 
 
-void Emulator::ExecuteInst_sty_zp_x()  //96", "SKIP", "REG", "OFFS")
+void Emulator::ExecuteInst_stx_zp_x()  //96", "SKIP", "REG", "OFFS")
 {
 	throw misc::Panic("Unimplemented instruction");
 }
 
 
-void Emulator::ExecuteInst_sty_abs()  //8e", "SKIP", "REG", "SKIP")
+void Emulator::ExecuteInst_stx_abs()  //8e", "SKIP", "REG", "SKIP")
 {
 	throw misc::Panic("Unimplemented instruction");
 }
@@ -1047,4 +1048,3 @@ void Emulator::ExecuteInst_sty_abs()  //8C", "SKIP", "REG", "SKIP")
 	throw misc::Panic("Unimplemented instruction");
 }
 
->>>>>>> 9e717c0c81db36aecf2d962351fa8be24332643d

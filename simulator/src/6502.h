@@ -213,9 +213,9 @@ class Emulator {
 	void ExecuteInst_pla_x_sp();  // "0x68", "SKIP", "SKIP", "SKIP");
 	void ExecuteInst_php_x_sp();  // "0x08", "SKIP", "SKIP", "SKIP");
 	void ExecuteInst_plp_x_sp();  // "0x28", "SKIP", "SKIP", "SKIP");
-	void ExecuteInst_sty_zp();  // "0x86", "SKIP", "REG", "SKIP");
-	void ExecuteInst_sty_zp_x();  // "0x96", "SKIP", "REG", "OFFS");
-	void ExecuteInst_sty_abs();  // "0x8e", "SKIP", "REG", "SKIP");
+	void ExecuteInst_stx_zp();  // "0x86", "SKIP", "REG", "SKIP");
+	void ExecuteInst_stx_zp_x();  // "0x96", "SKIP", "REG", "OFFS");
+	void ExecuteInst_stx_abs();  // "0x8e", "SKIP", "REG", "SKIP");
 	void ExecuteInst_sty_zp();  // "0x84", "SKIP", "REG", "SKIP");
 	void ExecuteInst_sty_zp_x();  // "0x94", "SKIP", "REG", "OFFS");
 	void ExecuteInst_sty_abs();  // "0x8C", "SKIP", "REG", "SKIP");
