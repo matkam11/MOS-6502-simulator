@@ -80,3 +80,15 @@ gtest_main.a : gtest-all.o gtest_main.o
 
 6502_unittest : 6502.o 6502_unittest.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+
+
+sample1.o : $(USER_DIR)/sample1.cc $(USER_DIR)/6502.h $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/6502.cc
+
+sample1_unittest.o : $(TEST_DIR)/6502_unittest.cc \
+                     $(USER_DIR)/6502.h $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(TEST_DIR)/6502_unittest.cc
+
+sample1_unittest : sample1.o sample1_unittest.o gtest_main.a
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+

@@ -27,6 +27,24 @@
 class Emulator {
    public:
     Emulator(uint16_t pc_start);
+    void StackPush(uint8_t byte);
+    uint8_t StackPop();
+    void WriteMem(uint16_t address, uint8_t value);
+    uint8_t ReadMem(uint16_t address);
+    void Ins_jsr(uint16_t destination);
+    void Ins_rts();
+    void Ins_jmp(uint16_t destination);
+
+    void Ins_ldx_imm(uint8_t value);
+    void Ins_ldy_imm(uint8_t value);
+    void Ins_lda_imm(uint8_t value);
+
+    void Ins_ldx_zer(uint8_t zero_addr);
+    void Ins_ldy_zer(uint8_t zero_addr);
+    void Ins_lda_zer(uint8_t zero_addr);
+
+    
+
     uint16_t pc;
     uint8_t x, y;
     uint8_t sp;
