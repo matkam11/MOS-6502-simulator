@@ -84,6 +84,16 @@ TEST(instructions, loads) {
     emu.WriteMem(0x0030, 0x33);
     emu.WriteMem(0x0040, 0x44);
 
+    emu.WriteMem(0x2020, 0x23);
+    emu.WriteMem(0x3030, 0x34);
+    emu.WriteMem(0x4040, 0x45);
+
+    emu.WriteMem(0x2040, 0x24);
+    emu.WriteMem(0x3050, 0x35);
+    emu.WriteMem(0x4060, 0x46);
+
+
+    // Text ld-_imm
     emu.Ins_ldx_imm(0x20);
     EXPECT_EQ(0x20, emu.x);
     emu.Ins_ldy_imm(0x30);
@@ -91,10 +101,85 @@ TEST(instructions, loads) {
     emu.Ins_lda_imm(0x40);
     EXPECT_EQ(0x40, emu.ac);
 
+    // Text ld-_abs
+    emu.Ins_ldx_abs(0x2020);
+    EXPECT_EQ(0x23, emu.x);
+    emu.Ins_ldy_abs(0x3030);
+    EXPECT_EQ(0x34, emu.y);
+    emu.Ins_lda_abs(0x4040);
+    EXPECT_EQ(0x45, emu.ac);
+
+    // Text ld-_zer
     emu.Ins_ldx_zer(0x20);
     EXPECT_EQ(0x22, emu.x);
     emu.Ins_ldy_zer(0x30);
     EXPECT_EQ(0x33, emu.y);
     emu.Ins_lda_zer(0x40);
     EXPECT_EQ(0x44, emu.ac);
+
+    // Test ldx_zeroy
+    emu.Ins_ldy_imm(0x70);
+    emu.Ins_ldx_zery(0xC0);
+    EXPECT_EQ(0x33, emu.x);
+
+    emu.Ins_ldy_imm(0x10);
+    emu.Ins_ldx_zery(0x10);
+    EXPECT_EQ(0x22, emu.x);
+    emu.Ins_ldx_zery(0x30);
+    EXPECT_EQ(0x44, emu.x);
+
+    // Test ldy_zero_x
+    emu.Ins_ldx_imm(0x70);
+    emu.Ins_ldy_zerx(0xC0);
+    EXPECT_EQ(0x33, emu.y);
+
+    emu.Ins_ldx_imm(0x10);
+    emu.Ins_ldy_zerx(0x10);
+    EXPECT_EQ(0x22, emu.y);
+    emu.Ins_ldy_zerx(0x30);
+    EXPECT_EQ(0x44, emu.y);
+
+    // Test lda_zerox
+    emu.Ins_ldx_imm(0x70);
+    emu.Ins_lda_zerx(0xC0);
+    EXPECT_EQ(0x33, emu.ac);
+
+    emu.Ins_ldx_imm(0x10);
+    emu.Ins_lda_zerx(0x10);
+    EXPECT_EQ(0x22, emu.ac);
+    emu.Ins_lda_zerx(0x30);
+    EXPECT_EQ(0x44, emu.ac);
+
+    // Test ldx_absy
+    emu.Ins_ldy_imm(0x40);
+    emu.Ins_ldx_absy(0x20);
+    EXPECT_EQ(0x24, emu.x);
+    emu.Ins_ldy_imm(0x20);
+    emu.Ins_ldx_absy(0x20);
+    EXPECT_EQ(0x23, emu.x);
+
+    // Test ldy_absx
+    emu.Ins_ldx_imm(0x40);
+    emu.Ins_ldy_absx(0x20);
+    EXPECT_EQ(0x24, emu.y);
+    emu.Ins_ldx_imm(0x20);
+    emu.Ins_ldy_absx(0x20);
+    EXPECT_EQ(0x23, emu.y);
+
+    // Test lda_absy
+    emu.Ins_ldy_imm(0x40);
+    emu.Ins_lda_absy(0x20);
+    EXPECT_EQ(0x24, emu.ac);
+    emu.Ins_ldy_imm(0x20);
+    emu.Ins_lda_absy(0x20);
+    EXPECT_EQ(0x23, emu.ac);
+
+    // Test lda_absx
+    emu.Ins_ldx_imm(0x40);
+    emu.Ins_lda_absx(0x20);
+    EXPECT_EQ(0x24, emu.ac);
+    emu.Ins_ldx_imm(0x20);
+    emu.Ins_lda_absx(0x20);
+    EXPECT_EQ(0x23, emu.ac);
+
 }
