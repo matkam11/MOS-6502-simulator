@@ -40,6 +40,7 @@ class Emulator {
     uint8_t last_opcode;
 
     Emulator(uint16_t pc_start);
+    bool Decode();
     void StackPush(uint8_t byte);
     uint8_t StackPop();
     void WriteMem(uint16_t address, uint8_t value);
@@ -170,7 +171,7 @@ class Emulator {
 	void ExecuteInst_ora_abs();  // "0x0D", "SKIP", "REG", "SKIP");
 	void ExecuteInst_ora_abs_x();  // "0x1D", "SKIP", "REG", "OFFS");
 	void ExecuteInst_ora_abs_y();  // "0x19", "SKIP", "REG", "OFFS");
-	void ExecuteInst_ora_ind_x();  // "0x01", "SKIP", "REG", "OFFS");
+	void Ins_ora_ind_x(uint8_t msb);  // "0x01", "SKIP", "REG", "OFFS");
 	void ExecuteInst_ora_ind_y();  // "0x11", "SKIP", "REG", "OFFS");
 	void ExecuteInst_tax_a_x();  // "0xAA", "SKIP", "SKIP", "SKIP");
 	void ExecuteInst_txa_x_a();  // "0x8A", "SKIP", "SKIP", "SKIP");

@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <cstring>
 #include "Error.h"
+#include <iomanip>
 
 Emulator::Emulator(uint16_t pc_start) {
 	pc = pc_start;
@@ -18,6 +19,24 @@ Emulator::Emulator(uint16_t pc_start) {
 	memset(mem, 0xFF, MEMORY_SIZE);
 };
 
+bool Emulator::Decode(){
+	std::cout << std::hex << pc << std::endl;
+	uint8_t opcode = ReadMem(pc);
+	switch(opcode) {
+		case 0x01:
+			Ins_ora_ind_x(ReadMem(pc++));
+			break;
+		case 0xA2:
+			Ins_ldx_imm(ReadMem(pc++));
+			break;
+		default:
+			std::cout << "Error: Opcode '" << std::setfill('0')<< std::setw(2) << (int) opcode << "' Not Implemented" << std::endl;
+			return false;
+	}
+	std::cout << std::hex << pc << std::endl;
+	pc++;
+	return true;
+}
 void Emulator::WriteMem(uint16_t address, uint8_t value) {
     mem[address] = value;
 };
@@ -755,9 +774,11 @@ void Emulator::ExecuteInst_ora_abs_y()  //19", "SKIP", "REG", "OFFS")
 }
 
 
-void Emulator::ExecuteInst_ora_ind_x()  //01", "SKIP", "REG", "OFFS")
+void Emulator::Ins_ora_ind_x(uint8_t msb)  //01", "SKIP", "REG", "OFFS")
 {
-	throw misc::Panic("Unimplemented instruction");
+	uint16_t addr = ((msb << 8) | y);
+	uint8_t value = ReadMem(addr);
+	ac |= value;
 }
 
 

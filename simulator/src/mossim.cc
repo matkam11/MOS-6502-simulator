@@ -7,6 +7,8 @@
 #include "Error.h"
 #include "Misc.h"
 #include "6502.h"
+#include <fstream>
+#include <iomanip>
 #define VERSION "0.01v"
 
 void WelcomeMessage(std::ostream &os)
@@ -46,21 +48,36 @@ void ProcessOptions()
 }
 
 // Load programs from context configuration file
-void LoadPrograms()
-{
-        // Load command-line program for when we can actually parse a program
-}
+// void LoadPrograms()
+// {
+//         // Load command-line program for when we can actually parse a program
+// }
 
 void MainLoop()
 {
         // Activate signal handler
         //simulation_engine::Engine *esim = esim::Engine::getInstance();
-        uint16_t base_addr = 20;
+        uint16_t base_addr = 0x1000;
+        uint16_t i = base_addr;
+        uint8_t byte;
         Emulator emu(base_addr);
+        std::ifstream inputBinary;
+        inputBinary.open("fibonacci", std::ios::in | std::ios::binary);
+        while (inputBinary.good()) {
+            //std::cout << std::hex << i << std::endl;
+            inputBinary >> std::setw(2) >> std::setprecision(2) >> std::hex >> byte;
+            emu.WriteMem(i,byte);
+            std::cout << std::dec << (int) emu.mem[i] << std::endl; 
+            i++;
+        }
+        inputBinary.close();
         std::cout << emu.pc << std::endl;
         // Simulation loop
         while (1/*!simulation_engine->hasFinished()*/)
         {
+            if (!emu.Decode()) {
+                break;
+            }
                 // =============================================================
                 // Event-driven simulation. Only process events and advance to
                 // next global simulation cycle if any architecture performed a
@@ -87,7 +104,6 @@ void MainLoop()
                 //		&& simulation_engine->getRealTime() > max_time * 1000000)
                 //	simulation_engine->Finish("MaxTime");
 
-                break;
         }
 
         // Process all remaining events
@@ -108,7 +124,7 @@ int MainProgram(int argc, char **argv)
         ProcessOptions();
 
         // Load programs
-        LoadPrograms();
+        //LoadPrograms();
 
         // Main simulation loop
         MainLoop();
