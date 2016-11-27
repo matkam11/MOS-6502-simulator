@@ -43,7 +43,19 @@ class Emulator {
     void Ins_ldy_zer(uint8_t zero_addr);
     void Ins_lda_zer(uint8_t zero_addr);
 
-    
+    void Ins_ldx_zery(uint8_t zero_addr);
+    void Ins_ldy_zerx(uint8_t zero_addr);
+    void Ins_lda_zerx(uint8_t zero_addr);
+
+    void Ins_ldx_abs(uint16_t addr);
+    void Ins_ldy_abs(uint16_t addr);
+    void Ins_lda_abs(uint16_t addr);
+
+    void Ins_ldx_absy(uint8_t addr);
+    void Ins_ldy_absx(uint8_t addr);
+    void Ins_lda_absx(uint8_t addr);
+    void Ins_lda_absy(uint8_t addr);
+
 
     uint16_t pc;
     uint8_t x, y;

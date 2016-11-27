@@ -8,6 +8,7 @@
 #include "6502.h"
 #include <stdint.h>
 #include <cstring>
+
 Emulator::Emulator(uint16_t pc_start) {
 	pc = pc_start;
 	sr = FLAG_INTERRUPT;;
@@ -73,6 +74,8 @@ void Emulator::Ins_jmp(uint16_t destination) {
 	pc = destination;
 };
 
+//void Emulator::Ins_ldx()
+
 void Emulator::Ins_ldx_imm(uint8_t value) {
 	x = value;
 }
@@ -95,4 +98,52 @@ void Emulator::Ins_ldy_zer(uint8_t zero_addr) {
 
 void Emulator::Ins_lda_zer(uint8_t zero_addr) {
 	ac = Emulator::ReadMem(zero_addr);
+}
+
+void Emulator::Ins_ldx_zery(uint8_t zero_addr) {
+	uint16_t addr = ((zero_addr + y)%0x100);
+	x = Emulator::ReadMem(addr);
+}
+
+void Emulator::Ins_ldy_zerx(uint8_t zero_addr) {
+	uint16_t addr = ((zero_addr + x)%0x100);
+	y = Emulator::ReadMem(addr);
+}
+
+void Emulator::Ins_lda_zerx(uint8_t zero_addr) {
+	uint16_t addr = ((zero_addr + x)%0x100);
+	ac = Emulator::ReadMem(addr);
+}
+
+
+void Emulator::Ins_ldx_abs(uint16_t addr) {
+	x = Emulator::ReadMem(addr);
+}
+
+void Emulator::Ins_ldy_abs(uint16_t addr) {
+	y = Emulator::ReadMem(addr);
+}
+
+void Emulator::Ins_lda_abs(uint16_t addr) {
+	ac = Emulator::ReadMem(addr);
+}
+
+void Emulator::Ins_ldx_absy(uint8_t msb) {
+	uint16_t addr = ((msb << 8) | y);
+	x = Emulator::ReadMem(addr);
+}
+
+void Emulator::Ins_ldy_absx(uint8_t msb) {
+	uint16_t addr = ((msb << 8) | x);
+	y = Emulator::ReadMem(addr);
+}
+
+void Emulator::Ins_lda_absx(uint8_t msb) {
+	uint16_t addr = ((msb << 8) | x);
+	ac = Emulator::ReadMem(addr);
+}
+
+void Emulator::Ins_lda_absy(uint8_t msb) {
+	uint16_t addr = ((msb << 8) | y);
+	ac = Emulator::ReadMem(addr);
 }
