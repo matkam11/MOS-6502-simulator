@@ -13,35 +13,68 @@
 
 Emulator::Emulator(uint16_t pc_start) {
 	pc = pc_start;
-	sr = FLAG_INTERRUPT;;
+	sr = FLAG_INTERRUPT | 0x20;
 	sp = 0xFF;
 	interrupt_waiting = 0x00;
 	memset(mem, 0xFF, MEMORY_SIZE);
 };
 
+uint16_t Emulator::ReadTwoBytes() {
+    uint8_t lsb, msb;
+    uint16_t addr;
+    lsb = ReadMem(pc++);
+    msb = ReadMem(pc++);
+    addr = ((msb << 8 ) | lsb);
+    return addr;
+}
 bool Emulator::Decode(){
-	std::cout << std::hex << pc << std::endl;
-	uint8_t opcode = ReadMem(pc);
+	std::cout << "Begin Decode... Opcode @" << std::hex << pc << std::endl;
+	uint8_t opcode = ReadMem(pc++);
 	switch(opcode) {
 		case 0x01:
 			Ins_ora_ind_x(ReadMem(pc++));
 			break;
+		case 0x1E:
+			Ins_asl_abs_x(ReadTwoBytes());
+		case 0x20:
+			Ins_jsr(ReadTwoBytes());
+			break;
+		case 0x9A:
+			Ins_txs_x_sp();
+			break;
 		case 0xA2:
 			Ins_ldx_imm(ReadMem(pc++));
+			break;
+		case 0xD0:
+			Ins_bne(ReadTwoBytes());
 			break;
 		default:
 			std::cout << "Error: Opcode '" << std::setfill('0')<< std::setw(2) << (int) opcode << "' Not Implemented" << std::endl;
 			return false;
 	}
 	std::cout << std::hex << pc << std::endl;
-	pc++;
+	//pc++;
 	return true;
 }
+
+void Emulator::SetFlag(bool set, uint8_t Flag) {
+	if (set) {
+		sr |= Flag;
+	} else {
+		sr &= Flag;
+	}
+}
+
+bool Emulator::TestFlag(uint8_t Flag) {
+	return (sr & Flag);
+}
+
 void Emulator::WriteMem(uint16_t address, uint8_t value) {
     mem[address] = value;
 };
 
 uint8_t Emulator::ReadMem(uint16_t address) {
+	//std::cout << "Reading mem at address: " << address << std::endl;
 	return(mem[address]);
 };
 
@@ -288,9 +321,16 @@ void Emulator::ExecuteInst_asl_abs()  //0E", "SKIP", "REG", "SKIP")
 }
 
 
-void Emulator::ExecuteInst_asl_abs_x()  //11", "SKIP", "REG", "OFFS")
+void Emulator::Ins_asl_abs_x(uint16_t abs_addr)  //1E", "SKIP", "REG", "OFFS")
 {
-	throw misc::Panic("Unimplemented instruction");
+	uint16_t final_addr = (abs_addr & x);
+	uint8_t value = ReadMem(final_addr);
+	SetFlag((value & 0x80),FLAG_CARRY);
+	value <<= 1;
+	value &= 0xFF;
+	SetFlag((value & 0x80),FLAG_NEGATIVE);
+	SetFlag(!value,FLAG_ZERO);
+	WriteMem(final_addr, value);
 }
 
 
@@ -342,9 +382,11 @@ void Emulator::ExecuteInst_br_on_cs()  //B0", "SKIP", "SKIP", "SKIP")
 }
 
 
-void Emulator::ExecuteInst_br_on_ne()  //D0", "SKIP", "SKIP", "SKIP")
+void Emulator::Ins_bne(uint16_t address)  //D0", "SKIP", "SKIP", "SKIP")
 {
-	throw misc::Panic("Unimplemented instruction");
+	if (!TestFlag(FLAG_ZERO)) {
+		pc = address;
+	}
 }
 
 
@@ -998,9 +1040,9 @@ void Emulator::ExecuteInst_sta_ind_y()  //91", "SKIP", "REG", "OFFS")
 }
 
 
-void Emulator::ExecuteInst_txs_x_sp()  //9A", "SKIP", "SKIP", "SKIP")
+void Emulator::Ins_txs_x_sp()  //9A", "SKIP", "SKIP", "SKIP")
 {
-	throw misc::Panic("Unimplemented instruction");
+	StackPush(x);
 }
 
 

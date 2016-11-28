@@ -40,11 +40,19 @@ class Emulator {
     uint8_t last_opcode;
 
     Emulator(uint16_t pc_start);
+    uint16_t ReadTwoBytes();
     bool Decode();
+    void SetFlag(bool set, uint8_t Flag);
+    bool TestFlag(uint8_t Flag);
+
     void StackPush(uint8_t byte);
     uint8_t StackPop();
+    
     void WriteMem(uint16_t address, uint8_t value);
     uint8_t ReadMem(uint16_t address);
+
+
+
     void Ins_jsr(uint16_t destination);
     void Ins_rts();
     void Ins_jmp(uint16_t destination);
@@ -90,7 +98,7 @@ class Emulator {
 	void ExecuteInst_asl_zp();  // "0x06", "SKIP", "REG", "SKIP");
 	void ExecuteInst_asl_zp_x();  // "0x16", "SKIP", "REG", "OFFS");
 	void ExecuteInst_asl_abs();  // "0x0E", "SKIP", "REG", "SKIP");
-	void ExecuteInst_asl_abs_x();  // "0x11", "SKIP", "REG", "OFFS");
+	void Ins_asl_abs_x(uint16_t abs_addr);  // "0x1E", "SKIP", "REG", "OFFS");
 	void ExecuteInst_bit_zp();  // "0x24", "SKIP", "REG", "SKIP");
 	void ExecuteInst_bit_abs();  // "0x2C", "SKIP", "REG", "SKIP");
 	void ExecuteInst_br_on_pl();  // "0x10", "SKIP", "SKIP", "SKIP");
@@ -99,7 +107,7 @@ class Emulator {
 	void ExecuteInst_br_on_vs();  // "0x70", "SKIP", "SKIP", "SKIP");
 	void ExecuteInst_br_on_cc();  // "0x90", "SKIP", "SKIP", "SKIP");
 	void ExecuteInst_br_on_cs();  // "0xB0", "SKIP", "SKIP", "SKIP");
-	void ExecuteInst_br_on_ne();  // "0xD0", "SKIP", "SKIP", "SKIP");
+	void Ins_bne(uint16_t address);  // "0xD0", "SKIP", "SKIP", "SKIP");
 	void ExecuteInst_br_on_eq();  // "0xF0", "SKIP", "SKIP", "SKIP");
 	void ExecuteInst_brk();  // "0x00", "SKIP", "SKIP", "SKIP");
 	void ExecuteInst_cmp_imm();  // "0xC9", "IME", "SKIP", "SKIP");
@@ -208,7 +216,7 @@ class Emulator {
 	void ExecuteInst_sta_abs_y();  // "0x99", "SKIP", "REG", "OFFS");
 	void ExecuteInst_sta_ind_x();  // "0x81", "SKIP", "REG", "OFFS");
 	void ExecuteInst_sta_ind_y();  // "0x91", "SKIP", "REG", "OFFS");
-	void ExecuteInst_txs_x_sp();  // "0x9A", "SKIP", "SKIP", "SKIP");
+	void Ins_txs_x_sp();  // "0x9A", "SKIP", "SKIP", "SKIP");
 	void ExecuteInst_tsx_sp_x();  // "0xBA", "SKIP", "SKIP", "SKIP");
 	void ExecuteInst_pha_x_sp();  // "0x48", "SKIP", "SKIP", "SKIP");
 	void ExecuteInst_pla_x_sp();  // "0x68", "SKIP", "SKIP", "SKIP");

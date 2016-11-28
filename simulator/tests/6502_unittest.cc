@@ -1,7 +1,7 @@
 #include "6502.h"
 #include "gtest/gtest.h"
-
-
+#include "Error.h"
+#include "Misc.h"
 // Test creating 6502 object
 TEST(emulator_object_test, Suceess) {
   // This test is named "Negative", and belongs to the "FactorialTest"
@@ -57,6 +57,11 @@ TEST(emulator_memory_test, Suceess) {
     EXPECT_EQ(0xFE, emu.sp);
     EXPECT_EQ(0xAB,emu.StackPop());
     EXPECT_EQ(0xFF, emu.sp);
+
+	emu.Ins_ldx_imm(0x20);
+    emu.Ins_txs_x_sp();
+    EXPECT_EQ(0xFD,emu.sp);
+    EXPECT_EQ(emu.mem[0x1FF],0x20);
 }
 
 TEST(instructions, Jumps) {
