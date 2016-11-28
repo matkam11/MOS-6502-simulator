@@ -25,7 +25,7 @@ TEST_DIR = .
 CPPFLAGS += -isystem $(GTEST_DIR)/include -isystem $(USER_DIR)
 
 # Flags passed to the C++ compiler.
-CXXFLAGS += -g -Wall -Wextra -pthread
+CXXFLAGS += -g -Wall -Wextra -pthread -std=c++11
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
@@ -71,6 +71,18 @@ gtest_main.a : gtest-all.o gtest_main.o
 # gtest_main.a, depending on whether it defines its own main()
 # function.
 
+Misc.o :  $(USER_DIR)/Misc.cc $(USER_DIR)/Misc.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/Misc.cc
+
+Error.o : $(USER_DIR)/Error.cc $(USER_DIR)/Error.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/Error.cc
+
+String.o: $(USER_DIR)/String.cc $(USER_DIR)/String.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/String.cc
+
+Terminal.o: $(USER_DIR)/Terminal.cc $(USER_DIR)/Terminal.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/Terminal.cc
+
 6502.o : $(USER_DIR)/6502.cc $(USER_DIR)/6502.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/6502.cc
 
@@ -78,7 +90,7 @@ gtest_main.a : gtest-all.o gtest_main.o
                      $(USER_DIR)/6502.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(TEST_DIR)/6502_unittest.cc
 
-6502_unittest : 6502.o 6502_unittest.o gtest_main.a
+6502_unittest : Misc.o Error.o String.o Terminal.o 6502.o 6502_unittest.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
 
 
