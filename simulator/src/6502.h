@@ -55,7 +55,7 @@ class Emulator {
 
     void Ins_jsr(uint16_t destination);
     void Ins_rts();
-    void Ins_jmp(uint16_t destination);
+    void Ins_jmp_abs(uint16_t destination);
 
     void Ins_ldx_imm(uint8_t value);
     void Ins_ldy_imm(uint8_t value);
@@ -107,7 +107,7 @@ class Emulator {
 	void ExecuteInst_br_on_vs();  // "0x70", "SKIP", "SKIP", "SKIP");
 	void ExecuteInst_br_on_cc();  // "0x90", "SKIP", "SKIP", "SKIP");
 	void ExecuteInst_br_on_cs();  // "0xB0", "SKIP", "SKIP", "SKIP");
-	void Ins_bne(uint16_t address);  // "0xD0", "SKIP", "SKIP", "SKIP");
+	void Ins_bne(uint8_t rel_address);  // "0xD0", "SKIP", "SKIP", "SKIP");
 	void ExecuteInst_br_on_eq();  // "0xF0", "SKIP", "SKIP", "SKIP");
 	void ExecuteInst_brk();  // "0x00", "SKIP", "SKIP", "SKIP");
 	void ExecuteInst_cmp_imm();  // "0xC9", "IME", "SKIP", "SKIP");

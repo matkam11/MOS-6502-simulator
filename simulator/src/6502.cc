@@ -28,7 +28,7 @@ uint16_t Emulator::ReadTwoBytes() {
     return addr;
 }
 bool Emulator::Decode(){
-	std::cout << "Begin Decode... Opcode @" << std::hex << pc << std::endl;
+	std::cout << std::hex << "Begin Decode... Opcode " << (int) ReadMem(pc) <<" @" << pc << std::endl;
 	uint8_t opcode = ReadMem(pc++);
 	switch(opcode) {
 		case 0x01:
@@ -36,8 +36,12 @@ bool Emulator::Decode(){
 			break;
 		case 0x1E:
 			Ins_asl_abs_x(ReadTwoBytes());
+			break;
 		case 0x20:
 			Ins_jsr(ReadTwoBytes());
+			break;
+		case 0x4C:
+			Ins_jmp_abs(ReadTwoBytes());
 			break;
 		case 0x9A:
 			Ins_txs_x_sp();
@@ -46,7 +50,7 @@ bool Emulator::Decode(){
 			Ins_ldx_imm(ReadMem(pc++));
 			break;
 		case 0xD0:
-			Ins_bne(ReadTwoBytes());
+			Ins_bne(ReadMem(pc++));
 			break;
 		default:
 			std::cout << "Error: Opcode '" << std::setfill('0')<< std::setw(2) << (int) opcode << "' Not Implemented" << std::endl;
@@ -123,7 +127,7 @@ void Emulator::Ins_rts() {
 	pc = ((msb << 8 ) | lsb) + 1;
 }
 
-void Emulator::Ins_jmp(uint16_t destination) {
+void Emulator::Ins_jmp_abs(uint16_t destination) {
 	pc = destination;
 };
 
@@ -382,10 +386,10 @@ void Emulator::ExecuteInst_br_on_cs()  //B0", "SKIP", "SKIP", "SKIP")
 }
 
 
-void Emulator::Ins_bne(uint16_t address)  //D0", "SKIP", "SKIP", "SKIP")
+void Emulator::Ins_bne(uint8_t rel_address)  //D0", "SKIP", "SKIP", "SKIP")
 {
 	if (!TestFlag(FLAG_ZERO)) {
-		pc = address;
+		pc = pc + rel_address;
 	}
 }
 
