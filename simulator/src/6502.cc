@@ -10,7 +10,7 @@
 #include <cstring>
 #include "Error.h"
 #include <iomanip>
-
+#include <bitset>
 Emulator::Emulator(uint16_t pc_start) {
 	pc = pc_start;
 	sr = FLAG_INTERRUPT | 0x20;
@@ -40,6 +40,9 @@ bool Emulator::Decode(){
 		case 0x0A:
 			Ins_asl_acc();
 			break;
+		case 0x10:
+			Ins_bpl(ReadMem(pc++));
+			break;
 		case 0x1E:
 			Ins_asl_abs_x(ReadTwoBytes());
 			break;
@@ -61,17 +64,40 @@ bool Emulator::Decode(){
 		case 0x9A:
 			Ins_txs_x_sp();
 			break;
+		case 0x9D:
+			Ins_sta_abs_x(ReadTwoBytes());
+			break;
 		case 0xA2:
 			Ins_ldx_imm(ReadMem(pc++));
 			break;
+		case 0xA5:
+			Ins_lda_zer(ReadMem(pc++));
+			break;
+		case 0xA6:
+			Ins_ldx_zer(ReadMem(pc++));
 		case 0xA8:
 			Ins_tay();
 			break;
 		case 0xA9:
 			Ins_lda_imm(ReadMem(pc++));
 			break;
+		case 0xAC:
+			Ins_ldy_abs(ReadTwoBytes());
+			break;
+		case 0xB5:
+			Ins_lda_zerx(ReadMem(pc++));
+			break;
+		case 0xBD:
+			Ins_lda_absx(ReadTwoBytes());
+			break;
 		case 0xC8:
 			Ins_inc_y();
+			break;
+		case 0xC0:
+			Ins_cpy_imm(ReadMem(pc++));
+			break;
+		case 0xCA:
+			Ins_dex();
 			break;
 		case 0xD0:
 			Ins_bne(ReadMem(pc++));
@@ -86,17 +112,22 @@ bool Emulator::Decode(){
 			std::cout << "Error: Opcode '" << std::setfill('0')<< std::setw(2) << (int) opcode << "' Not Implemented" << std::endl;
 			return false;
 	}
-	std::cout << std::hex << pc << std::endl;
+	// std::cout << std::hex << pc << std::endl;
 	//pc++;
 	return true;
 }
 
 void Emulator::SetFlag(bool set, uint8_t Flag) {
+	std::cout << "Status Register: SV BDIZC" << std::endl;
+	std::cout << "Status Register: " << std::bitset<8>(sr) << std::endl;
+	std::cout << "Setting Flag: " << std::bitset<8>(Flag) << " To Value: " << set << std::endl;
 	if (set) {
 		sr |= Flag;
 	} else {
-		sr &= Flag;
+		sr &= (0xFF - Flag);
 	}
+	std::cout << "Status Register: SV BDIZC" << std::endl;
+	std::cout << "Status Register: " << std::bitset<8>(sr) << std::endl;
 }
 
 bool Emulator::TestFlag(uint8_t Flag) {
@@ -144,7 +175,7 @@ void Emulator::Ins_jsr(uint16_t destination) {
     pc--;
     Emulator::StackPush((pc >> 8) & 0xFF);
     Emulator::StackPush(pc & 0xFF);
-	pc = destination;
+	pc = destination+1;
 };
 
 void Emulator::Ins_rts() {
@@ -225,8 +256,8 @@ void Emulator::Ins_ldy_absx(uint8_t msb) {
 	y = Emulator::ReadMem(addr);
 }
 
-void Emulator::Ins_lda_absx(uint8_t msb) {
-	uint16_t addr = ((msb << 8) | x);
+void Emulator::Ins_lda_absx(uint16_t addr) {
+	addr += x;
 	ac = Emulator::ReadMem(addr);
 }
 
@@ -333,11 +364,15 @@ void Emulator::ExecuteInst_and_ind_y()  //31", "SKIP", "REG", "OFFS")
 
 void Emulator::Ins_asl_acc()  //0A", "SKIP", "SKIP", "SKIP")
 {
+	std::cout << "Pre  Shift Accumulator = " << std::bitset<8>(ac) << std::endl;
 	SetFlag((ac & 0x80),FLAG_CARRY);
 	ac <<= 1;
 	ac &= 0xFF;
+	std::cout << "Post Shift Accumulator = " << std::bitset<8>(ac) << std::endl;
 	SetFlag((ac & 0x80),FLAG_NEGATIVE);
 	SetFlag(!ac,FLAG_ZERO);
+	std::cout << "Status Register: SV BDIZC" << std::endl;
+	std::cout << "Status Register: " << std::bitset<8>(sr) << std::endl;
 
 }
 
@@ -364,9 +399,11 @@ void Emulator::Ins_asl_abs_x(uint16_t abs_addr)  //1E", "SKIP", "REG", "OFFS")
 {
 	uint16_t final_addr = (abs_addr & x);
 	uint8_t value = ReadMem(final_addr);
+	std::cout << "Pre  Shift Memory = " << std::bitset<8>(value) << std::endl;
 	SetFlag((value & 0x80),FLAG_CARRY);
 	value <<= 1;
 	value &= 0xFF;
+	std::cout << "Post Shift Memory = " << std::bitset<8>(value) << std::endl;
 	SetFlag((value & 0x80),FLAG_NEGATIVE);
 	SetFlag(!value,FLAG_ZERO);
 	WriteMem(final_addr, value);
@@ -385,9 +422,25 @@ void Emulator::ExecuteInst_bit_abs()  //2C", "SKIP", "REG", "SKIP")
 }
 
 
-void Emulator::ExecuteInst_br_on_pl()  //10", "SKIP", "SKIP", "SKIP")
+void Emulator::Ins_bpl(uint8_t rel_address)  //10", "SKIP", "SKIP", "SKIP")
 {
-	throw misc::Panic("Unimplemented instruction");
+	std::cout << "BRANCH Positive" << std::endl;
+	std::cout << "Status Register: SV BDIZC" << std::endl;
+	std::cout << "Status Register: " << std::bitset<8>(sr) << std::endl;
+	if (!TestFlag(FLAG_NEGATIVE)) {
+	    uint8_t lsb, msb;
+	    uint16_t destination;
+	    std::cout << "Relative Address: " << (int) rel_address << std::endl;
+	    msb = ((pc >> 8) & 0xFF);
+	    lsb = (pc & 0xFF);
+	    std::cout << "Values: " << (int) lsb << " " << (int) msb <<  std::endl;
+	    lsb = ((lsb + rel_address)%0x100);
+	    std::cout << "Value: " << (int) lsb << std::endl;
+	    destination = ((msb << 8) | lsb);
+	    std::cout << "destination: " << destination << std::endl;
+		pc = destination;
+		// //pc = pc + rel_address;
+	}
 }
 
 
@@ -423,6 +476,9 @@ void Emulator::ExecuteInst_br_on_cs()  //B0", "SKIP", "SKIP", "SKIP")
 
 void Emulator::Ins_bne(uint8_t rel_address)  //D0", "SKIP", "SKIP", "SKIP")
 {
+	std::cout << "BRANCH NE" << std::endl;
+	// std::cout << "Status Register: SV BDIZC" << std::endl;
+	// std::cout << "Status Register: " << std::bitset<8>(sr) << std::endl;
 	if (!TestFlag(FLAG_ZERO)) {
 		pc = pc + rel_address;
 	}
@@ -431,6 +487,9 @@ void Emulator::Ins_bne(uint8_t rel_address)  //D0", "SKIP", "SKIP", "SKIP")
 
 void Emulator::Ins_beq(uint8_t rel_address)  //F0", "SKIP", "SKIP", "SKIP")
 {
+	std::cout << "BRANCH EQ" << std::endl;
+	// std::cout << "Status Register: SV BDIZC" << std::endl;
+	// std::cout << "Status Register: " << std::bitset<8>(sr) << std::endl;
 	if (TestFlag(FLAG_ZERO)) {
 		pc = pc + rel_address;
 	}
@@ -508,9 +567,11 @@ void Emulator::ExecuteInst_cpx_abs()  //EC", "SKIP", "REG", "SKIP")
 }
 
 
-void Emulator::ExecuteInst_cpy_imm()  //C0", "IME", "SKIP", "SKIP")
+void Emulator::Ins_cpy_imm(uint8_t value)  //C0", "IME", "SKIP", "SKIP")
 {
-	throw misc::Panic("Unimplemented instruction");
+	SetFlag(((y + value) > 0x100) , FLAG_CARRY);
+	SetFlag((y < value) , FLAG_NEGATIVE);
+	SetFlag((y == value) , FLAG_ZERO);
 }
 
 
@@ -882,9 +943,11 @@ void Emulator::ExecuteInst_txa_x_a()  //8A", "SKIP", "SKIP", "SKIP")
 }
 
 
-void Emulator::ExecuteInst_dex_x()  //CA", "SKIP", "SKIP", "SKIP")
+void Emulator::Ins_dex()  //CA", "SKIP", "SKIP", "SKIP")
 {
-	throw misc::Panic("Unimplemented instruction");
+	x--;
+	SetFlag((x & 0x80),FLAG_NEGATIVE);
+    SetFlag((!x),FLAG_ZERO);
 }
 
 
@@ -914,7 +977,9 @@ void Emulator::ExecuteInst_dey_y()  //88", "SKIP", "SKIP", "SKIP")
 
 void Emulator::Ins_inc_y()  //C8", "SKIP", "SKIP", "SKIP")
 {
-	y++;
+	y = (y + 1)%0x100;
+	SetFlag((y & 0x80), FLAG_NEGATIVE);
+    SetFlag((!y), FLAG_ZERO);
 }
 
 
@@ -1056,9 +1121,10 @@ void Emulator::ExecuteInst_sta_abs()  //8D", "SKIP", "REG", "SKIP")
 }
 
 
-void Emulator::ExecuteInst_sta_abs_x()  //9D", "SKIP", "REG", "OFFS")
+void Emulator::Ins_sta_abs_x(uint16_t address)  //9D", "SKIP", "REG", "OFFS")
 {
-	throw misc::Panic("Unimplemented instruction");
+	uint16_t addr = (address + x);
+	Emulator::WriteMem(addr, ac);
 }
 
 
