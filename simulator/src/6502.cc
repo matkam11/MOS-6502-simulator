@@ -34,6 +34,12 @@ bool Emulator::Decode(){
 		case 0x01:
 			Ins_ora_ind_x(ReadMem(pc++));
 			break;
+		case 0x08:
+			Ins_php();
+			break;
+		case 0x0A:
+			Ins_asl_acc();
+			break;
 		case 0x1E:
 			Ins_asl_abs_x(ReadTwoBytes());
 			break;
@@ -43,14 +49,38 @@ bool Emulator::Decode(){
 		case 0x4C:
 			Ins_jmp_abs(ReadTwoBytes());
 			break;
+		case 0x60:
+			Ins_rts();
+			break;
+		case 0x85:
+			Ins_sta_zp(ReadMem(pc++));
+			break;
+		case 0x91:
+			Ins_sta_ind_y(ReadMem(pc++));
+			break;
 		case 0x9A:
 			Ins_txs_x_sp();
 			break;
 		case 0xA2:
 			Ins_ldx_imm(ReadMem(pc++));
 			break;
+		case 0xA8:
+			Ins_tay();
+			break;
+		case 0xA9:
+			Ins_lda_imm(ReadMem(pc++));
+			break;
+		case 0xC8:
+			Ins_inc_y();
+			break;
 		case 0xD0:
 			Ins_bne(ReadMem(pc++));
+			break;
+		case 0xD8:
+			Ins_cld();
+			break;
+		case 0xF0:
+			Ins_beq(ReadMem(pc++));
 			break;
 		default:
 			std::cout << "Error: Opcode '" << std::setfill('0')<< std::setw(2) << (int) opcode << "' Not Implemented" << std::endl;
@@ -301,9 +331,14 @@ void Emulator::ExecuteInst_and_ind_y()  //31", "SKIP", "REG", "OFFS")
 }
 
 
-void Emulator::ExecuteInst_asl_acc()  //0A", "SKIP", "SKIP", "SKIP")
+void Emulator::Ins_asl_acc()  //0A", "SKIP", "SKIP", "SKIP")
 {
-	throw misc::Panic("Unimplemented instruction");
+	SetFlag((ac & 0x80),FLAG_CARRY);
+	ac <<= 1;
+	ac &= 0xFF;
+	SetFlag((ac & 0x80),FLAG_NEGATIVE);
+	SetFlag(!ac,FLAG_ZERO);
+
 }
 
 
@@ -394,11 +429,12 @@ void Emulator::Ins_bne(uint8_t rel_address)  //D0", "SKIP", "SKIP", "SKIP")
 }
 
 
-void Emulator::ExecuteInst_br_on_eq()  //F0", "SKIP", "SKIP", "SKIP")
+void Emulator::Ins_beq(uint8_t rel_address)  //F0", "SKIP", "SKIP", "SKIP")
 {
-	throw misc::Panic("Unimplemented instruction");
+	if (TestFlag(FLAG_ZERO)) {
+		pc = pc + rel_address;
+	}
 }
-
 
 void Emulator::ExecuteInst_brk()  //00", "SKIP", "SKIP", "SKIP")
 {
@@ -592,9 +628,9 @@ void Emulator::ExecuteInst_flag_clv()  //B8", "SKIP", "SKIP", "SKIP")
 }
 
 
-void Emulator::ExecuteInst_flag_cld()  //C8", "SKIP", "SKIP", "SKIP")
+void Emulator::Ins_cld()  //D8", "SKIP", "SKIP", "SKIP")
 {
-	throw misc::Panic("Unimplemented instruction");
+	SetFlag(0, FLAG_DECIMAL);
 }
 
 
@@ -858,9 +894,9 @@ void Emulator::ExecuteInst_inx_x()  //E8", "SKIP", "SKIP", "SKIP")
 }
 
 
-void Emulator::ExecuteInst_tay_a_y()  //A8", "SKIP", "SKIP", "SKIP")
+void Emulator::Ins_tay()  //A8", "SKIP", "SKIP", "SKIP")
 {
-	throw misc::Panic("Unimplemented instruction");
+	y = ac;
 }
 
 
@@ -876,9 +912,9 @@ void Emulator::ExecuteInst_dey_y()  //88", "SKIP", "SKIP", "SKIP")
 }
 
 
-void Emulator::ExecuteInst_iny_y()  //C8", "SKIP", "SKIP", "SKIP")
+void Emulator::Ins_inc_y()  //C8", "SKIP", "SKIP", "SKIP")
 {
-	throw misc::Panic("Unimplemented instruction");
+	y++;
 }
 
 
@@ -1002,9 +1038,9 @@ void Emulator::ExecuteInst_sbc_ind_y()  //F1", "SKIP", "REG", "OFFS")
 }
 
 
-void Emulator::ExecuteInst_sta_zp()  //85", "SKIP", "REG", "SKIP")
+void Emulator::Ins_sta_zp(uint8_t zero_addr)  //85", "SKIP", "REG", "SKIP")
 {
-	throw misc::Panic("Unimplemented instruction");
+	Emulator::WriteMem(zero_addr, ac);
 }
 
 
@@ -1038,9 +1074,16 @@ void Emulator::ExecuteInst_sta_ind_x()  //81", "SKIP", "REG", "OFFS")
 }
 
 
-void Emulator::ExecuteInst_sta_ind_y()  //91", "SKIP", "REG", "OFFS")
+void Emulator::Ins_sta_ind_y(uint8_t start_address)  //91", "SKIP", "REG", "OFFS")
 {
-	throw misc::Panic("Unimplemented instruction");
+	uint8_t lsb,msb;
+	uint16_t address;
+	lsb = ReadMem(start_address++);
+	msb = ReadMem(start_address);
+
+    address = ((msb << 8 ) | lsb);
+    address += y;
+	Emulator::WriteMem(address, ac);
 }
 
 
@@ -1068,9 +1111,9 @@ void Emulator::ExecuteInst_pla_x_sp()  //68", "SKIP", "SKIP", "SKIP")
 }
 
 
-void Emulator::ExecuteInst_php_x_sp()  //08", "SKIP", "SKIP", "SKIP")
+void Emulator::Ins_php()  //08", "SKIP", "SKIP", "SKIP")
 {
-	throw misc::Panic("Unimplemented instruction");
+	StackPush(sr);
 }
 
 

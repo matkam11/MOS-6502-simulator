@@ -57,9 +57,9 @@ void MainLoop()
 {
         // Activate signal handler
         //simulation_engine::Engine *esim = esim::Engine::getInstance();
-        uint16_t base_addr = 0x1000;
+        uint16_t base_addr = 0x0800;
         uint16_t i = base_addr;
-        base_addr = 0x1004;
+        base_addr = 0x0804;
         char byte;
         Emulator emu(base_addr);
         std::ifstream inputBinary;
