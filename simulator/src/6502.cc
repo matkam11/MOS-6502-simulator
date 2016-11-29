@@ -35,16 +35,16 @@ bool Emulator::Decode(){
 			Ins_ora_ind_x(ReadMem(pc++));
 			break;
 		case 0x06:
-			Ins_asl_zp(ReadMem(pc++));
+			Ins_asl_zp(ReadMem(pc++)); // Tested
 			break;
 		case 0x08:
-			Ins_php();
+			Ins_php(); // Tested
 			break;
 		case 0x0A:
-			Ins_asl_acc();
+			Ins_asl_acc(); // Tested
 			break;
 		case 0x10:
-			Ins_bpl(ReadMem(pc++));
+			Ins_bpl(ReadMem(pc++)); // Tested
 			break;
 		case 0x1E:
 			Ins_asl_abs_x(ReadTwoBytes());
@@ -65,24 +65,26 @@ bool Emulator::Decode(){
 			Ins_sta_ind_y(ReadMem(pc++));
 			break;
 		case 0x9A:
-			Ins_txs_x_sp();
+			Ins_txs_x_sp(); // Tested
 			break;
 		case 0x9D:
 			Ins_sta_abs_x(ReadTwoBytes());
 			break;
+		case 0xA0:
+			Ins_ldy_imm(ReadMem(pc++)); // Tested
 		case 0xA2:
-			Ins_ldx_imm(ReadMem(pc++));
+			Ins_ldx_imm(ReadMem(pc++)); // Tested
 			break;
 		case 0xA5:
 			Ins_lda_zer(ReadMem(pc++));
 			break;
 		case 0xA6:
-			Ins_ldx_zer(ReadMem(pc++));
+			Ins_ldx_zer(ReadMem(pc++)); 
 		case 0xA8:
 			Ins_tay();
 			break;
 		case 0xA9:
-			Ins_lda_imm(ReadMem(pc++));
+			Ins_lda_imm(ReadMem(pc++)); // Tested
 			break;
 		case 0xAC:
 			Ins_ldy_abs(ReadTwoBytes());
@@ -103,13 +105,13 @@ bool Emulator::Decode(){
 			Ins_dex();
 			break;
 		case 0xD0:
-			Ins_bne(ReadMem(pc++));
+			Ins_bne(ReadMem(pc++)); // Tested
 			break;
 		case 0xD8:
 			Ins_cld();
 			break;
 		case 0xF0:
-			Ins_beq(ReadMem(pc++));
+			Ins_beq(ReadMem(pc++)); // Tested
 			break;
 		default:
 			std::cout << "Error: Opcode '" << std::setfill('0')<< std::setw(2) << (int) opcode << "' Not Implemented" << std::endl;
@@ -434,22 +436,14 @@ void Emulator::ExecuteInst_bit_abs()  //2C", "SKIP", "REG", "SKIP")
 
 void Emulator::Ins_bpl(uint8_t rel_address)  //10", "SKIP", "SKIP", "SKIP")
 {
-	// std::cout << "BRANCH Positive" << std::endl;
-	// std::cout << "Status Register: SV BDIZC" << std::endl;
-	// std::cout << "Status Register: " << std::bitset<8>(sr) << std::endl;
 	if (!TestFlag(FLAG_NEGATIVE)) {
 	    uint8_t lsb, msb;
 	    uint16_t destination;
-	    // std::cout << "Relative Address: " << (int) rel_address << std::endl;
 	    msb = ((pc >> 8) & 0xFF);
 	    lsb = (pc & 0xFF);
-	    // std::cout << "Values: " << (int) lsb << " " << (int) msb <<  std::endl;
 	    lsb = ((lsb + rel_address)%0x100);
-	    // std::cout << "Value: " << (int) lsb << std::endl;
 	    destination = ((msb << 8) | lsb);
-	    // std::cout << "destination: " << destination << std::endl;
 		pc = destination;
-		// //pc = pc + rel_address;
 	}
 }
 
@@ -486,22 +480,27 @@ void Emulator::ExecuteInst_br_on_cs()  //B0", "SKIP", "SKIP", "SKIP")
 
 void Emulator::Ins_bne(uint8_t rel_address)  //D0", "SKIP", "SKIP", "SKIP")
 {
-	std::cout << "BRANCH NE" << std::endl;
-	// std::cout << "Status Register: SV BDIZC" << std::endl;
-	// std::cout << "Status Register: " << std::bitset<8>(sr) << std::endl;
 	if (!TestFlag(FLAG_ZERO)) {
-		pc = pc + rel_address;
+		uint8_t lsb, msb;
+	    uint16_t destination;
+	    msb = ((pc >> 8) & 0xFF);
+	    lsb = (pc & 0xFF);
+	    lsb = ((lsb + rel_address)%0x100);
+	    destination = ((msb << 8) | lsb);
+		pc = destination;
 	}
 }
 
-
 void Emulator::Ins_beq(uint8_t rel_address)  //F0", "SKIP", "SKIP", "SKIP")
 {
-	std::cout << "BRANCH EQ" << std::endl;
-	// std::cout << "Status Register: SV BDIZC" << std::endl;
-	// std::cout << "Status Register: " << std::bitset<8>(sr) << std::endl;
 	if (TestFlag(FLAG_ZERO)) {
-		pc = pc + rel_address;
+		uint8_t lsb, msb;
+	    uint16_t destination;
+	    msb = ((pc >> 8) & 0xFF);
+	    lsb = (pc & 0xFF);
+	    lsb = ((lsb + rel_address)%0x100);
+	    destination = ((msb << 8) | lsb);
+		pc = destination;
 	}
 }
 
@@ -579,9 +578,10 @@ void Emulator::ExecuteInst_cpx_abs()  //EC", "SKIP", "REG", "SKIP")
 
 void Emulator::Ins_cpy_imm(uint8_t value)  //C0", "IME", "SKIP", "SKIP")
 {
+	uint16_t result = y - value;
 	SetFlag(((y + value) > 0x100) , FLAG_CARRY);
-	SetFlag((y < value) , FLAG_NEGATIVE);
-	SetFlag((y == value) , FLAG_ZERO);
+	SetFlag((result & 0x80) , FLAG_NEGATIVE);
+	SetFlag((result == 0) , FLAG_ZERO);
 }
 
 

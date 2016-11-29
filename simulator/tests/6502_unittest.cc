@@ -93,6 +93,10 @@ TEST(instructions, Stack_Register) {
     emu.Ins_php();
 	EXPECT_EQ(0b00100101, emu.ReadMem(0x01FF));
 
+	emu.x = 0x40;
+	emu.Ins_txs_x_sp();
+	EXPECT_EQ(0x40, emu.ReadMem(0x01FE));
+
 }
 
 
@@ -113,10 +117,41 @@ TEST(instructions, Jumps) {
     EXPECT_EQ(0x20FF, emu.pc);
 }
 
+TEST(instructions, Compares) {
+	uint16_t base_addr = 0x0040;
+    Emulator emu(base_addr);
+
+    // Test Ins_cpy_imm();
+    emu.y = 0x20;
+    emu.Ins_cpy_imm(0x10);
+    EXPECT_EQ(0, emu.TestFlag(FLAG_ZERO));
+    EXPECT_EQ(0, emu.TestFlag(FLAG_NEGATIVE));
+    EXPECT_EQ(0, emu.TestFlag(FLAG_CARRY));
+
+    emu.Ins_cpy_imm(0x20);
+    EXPECT_EQ(1, emu.TestFlag(FLAG_ZERO));
+    EXPECT_EQ(0, emu.TestFlag(FLAG_NEGATIVE));
+    EXPECT_EQ(0, emu.TestFlag(FLAG_CARRY));
+    emu.SetFlag(0, FLAG_ZERO);
+
+    emu.Ins_cpy_imm(0x30);
+    EXPECT_EQ(0, emu.TestFlag(FLAG_ZERO));
+    EXPECT_EQ(1, emu.TestFlag(FLAG_NEGATIVE));
+    EXPECT_EQ(0, emu.TestFlag(FLAG_CARRY));
+    emu.SetFlag(0, FLAG_NEGATIVE);
+
+    emu.Ins_cpy_imm(0xFE);
+    EXPECT_EQ(0, emu.TestFlag(FLAG_ZERO));
+    EXPECT_EQ(0, emu.TestFlag(FLAG_NEGATIVE));
+    EXPECT_EQ(1, emu.TestFlag(FLAG_CARRY));
+    emu.SetFlag(0, FLAG_CARRY);
+}
+
 TEST(instructions, Branches) {
 	uint16_t base_addr = 0x0040;
     Emulator emu(base_addr);
 
+    // Test Ins_bpl() with 00XX and XXXX addresses. Second Byte should overflow;
     emu.Ins_bpl(0x20);
     EXPECT_EQ(0x60, emu.pc);
     emu.Ins_bpl(0xB0);
@@ -137,6 +172,52 @@ TEST(instructions, Branches) {
     emu.Ins_bpl(0x20);
     EXPECT_EQ(0x2010, emu.pc);
     emu.SetFlag(0, FLAG_NEGATIVE);
+
+    // Test Ins_bne()
+    emu.pc = 0x0040;
+    emu.Ins_bne(0x20);
+    EXPECT_EQ(0x60, emu.pc);
+    emu.Ins_bne(0xB0);
+    EXPECT_EQ(0x10, emu.pc);
+
+    emu.SetFlag(1, FLAG_ZERO);
+    emu.Ins_bne(0x20);
+    EXPECT_EQ(0x10, emu.pc);
+    emu.SetFlag(0, FLAG_ZERO);
+ 
+    emu.pc = 0x2040;
+    emu.Ins_bne(0x20);
+    EXPECT_EQ(0x2060, emu.pc);
+    emu.Ins_bne(0xB0);
+    EXPECT_EQ(0x2010, emu.pc);
+
+    emu.SetFlag(1, FLAG_ZERO);
+    emu.Ins_bne(0x20);
+    EXPECT_EQ(0x2010, emu.pc);
+    emu.SetFlag(0, FLAG_ZERO);
+
+    // Test Ins_beq()
+    emu.pc = 0x0040;
+    emu.SetFlag(1, FLAG_ZERO);
+    emu.Ins_beq(0x20);
+    EXPECT_EQ(0x60, emu.pc);
+    emu.Ins_beq(0xB0);
+    EXPECT_EQ(0x10, emu.pc);
+
+    emu.SetFlag(0, FLAG_ZERO);
+    emu.Ins_beq(0x20);
+    EXPECT_EQ(0x10, emu.pc);
+    emu.SetFlag(1, FLAG_ZERO);
+ 
+    emu.pc = 0x2040;
+    emu.Ins_beq(0x20);
+    EXPECT_EQ(0x2060, emu.pc);
+    emu.Ins_beq(0xB0);
+    EXPECT_EQ(0x2010, emu.pc);
+
+    emu.SetFlag(0, FLAG_ZERO);
+    emu.Ins_beq(0x20);
+    EXPECT_EQ(0x2010, emu.pc);
 }
 
 TEST(instructions, Loads) {
