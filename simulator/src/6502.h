@@ -97,7 +97,7 @@ class Emulator {
 	void Ins_asl_acc();  // "0x0A", "SKIP", "SKIP", "SKIP");
 	void Ins_asl_zp(uint8_t zero_addr);  // "0x06", "SKIP", "REG", "SKIP");
 	void ExecuteInst_asl_zp_x();  // "0x16", "SKIP", "REG", "OFFS");
-	void ExecuteInst_asl_abs();  // "0x0E", "SKIP", "REG", "SKIP");
+	void Ins_asl_abs(uint16_t address);  // "0x0E", "SKIP", "REG", "SKIP");
 	void Ins_asl_abs_x(uint16_t abs_addr);  // "0x1E", "SKIP", "REG", "OFFS");
 	void ExecuteInst_bit_zp();  // "0x24", "SKIP", "REG", "SKIP");
 	void ExecuteInst_bit_abs();  // "0x2C", "SKIP", "REG", "SKIP");
@@ -128,7 +128,7 @@ class Emulator {
 	void ExecuteInst_dec_zp_x();  // "0xD6", "SKIP", "REG", "OFFS");
 	void ExecuteInst_dec_abs();  // "0xCE", "SKIP", "REG", "SKIP");
 	void ExecuteInst_dec_abs_x();  // "0xDE", "SKIP", "REG", "OFFS");
-	void ExecuteInst_eor_imm();  // "0x49", "IME", "SKIP", "SKIP");
+	void Ins_eor_imm(uint8_t value);  // "0x49", "IME", "SKIP", "SKIP");
 	void ExecuteInst_eor_zp();  // "0x45", "SKIP", "REG", "SKIP");
 	void ExecuteInst_eor_zp_x();  // "0x55", "SKIP", "REG", "OFFS");
 	void ExecuteInst_eor_abs();  // "0x4D", "SKIP", "REG", "SKIP");
@@ -211,7 +211,7 @@ class Emulator {
 	void ExecuteInst_sbc_ind_y();  // "0xF1", "SKIP", "REG", "OFFS");
 	void Ins_sta_zp(uint8_t zero_addr);  // "0x85", "SKIP", "REG", "SKIP");
 	void ExecuteInst_sta_zp_x();  // "0x95", "SKIP", "REG", "OFFS");
-	void ExecuteInst_sta_abs();  // "0x8D", "SKIP", "REG", "SKIP");
+	void Ins_sta_abs(uint16_t address);  // "0x8D", "SKIP", "REG", "SKIP");
 	void Ins_sta_abs_x(uint16_t address);  // "0x9D", "SKIP", "REG", "OFFS");
 	void ExecuteInst_sta_abs_y();  // "0x99", "SKIP", "REG", "OFFS");
 	void ExecuteInst_sta_ind_x();  // "0x81", "SKIP", "REG", "OFFS");
@@ -222,9 +222,9 @@ class Emulator {
 	void ExecuteInst_pla_x_sp();  // "0x68", "SKIP", "SKIP", "SKIP");
 	void Ins_php();  // "0x08", "SKIP", "SKIP", "SKIP");
 	void ExecuteInst_plp_x_sp();  // "0x28", "SKIP", "SKIP", "SKIP");
-	void ExecuteInst_stx_zp();  // "0x86", "SKIP", "REG", "SKIP");
+	void Ins_stx_zp(uint8_t address);  // "0x86", "SKIP", "REG", "SKIP");
 	void ExecuteInst_stx_zp_x();  // "0x96", "SKIP", "REG", "OFFS");
-	void ExecuteInst_stx_abs();  // "0x8e", "SKIP", "REG", "SKIP");
+	void Ins_stx_abs(uint16_t address);  // "0x8e", "SKIP", "REG", "SKIP");
 	void ExecuteInst_sty_zp();  // "0x84", "SKIP", "REG", "SKIP");
 	void ExecuteInst_sty_zp_x();  // "0x94", "SKIP", "REG", "OFFS");
 	void ExecuteInst_sty_abs();  // "0x8C", "SKIP", "REG", "SKIP");

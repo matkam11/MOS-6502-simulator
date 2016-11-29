@@ -43,6 +43,9 @@ bool Emulator::Decode(){
 		case 0x0A:
 			Ins_asl_acc(); // Tested
 			break;
+		case 0x0E:
+			Ins_asl_abs(ReadTwoBytes()); // Tested
+			break;
 		case 0x10:
 			Ins_bpl(ReadMem(pc++)); // Tested
 			break;
@@ -52,6 +55,9 @@ bool Emulator::Decode(){
 		case 0x20:
 			Ins_jsr(ReadTwoBytes()); // Tested
 			break;
+		case 0x49:
+			Ins_eor_imm(ReadMem(pc++));
+			break;
 		case 0x4C:
 			Ins_jmp_abs(ReadTwoBytes()); // Tested
 			break;
@@ -60,6 +66,15 @@ bool Emulator::Decode(){
 			break;
 		case 0x85:
 			Ins_sta_zp(ReadMem(pc++));
+			break;
+		case 0x86:
+			Ins_stx_zp(ReadMem(pc++));
+			break;
+		case 0x8D:
+			Ins_sta_abs(ReadTwoBytes());
+			break;
+		case 0x8E:
+			Ins_stx_abs(ReadTwoBytes());
 			break;
 		case 0x91:
 			Ins_sta_ind_y(ReadMem(pc++));
@@ -72,6 +87,7 @@ bool Emulator::Decode(){
 			break;
 		case 0xA0:
 			Ins_ldy_imm(ReadMem(pc++)); // Tested
+			break;
 		case 0xA2:
 			Ins_ldx_imm(ReadMem(pc++)); // Tested
 			break;
@@ -81,7 +97,7 @@ bool Emulator::Decode(){
 		case 0xA6:
 			Ins_ldx_zer(ReadMem(pc++)); // Tested
 		case 0xA8:
-			Ins_tay();
+			Ins_tay(); // Tested
 			break;
 		case 0xA9:
 			Ins_lda_imm(ReadMem(pc++)); // Tested
@@ -96,19 +112,19 @@ bool Emulator::Decode(){
 			Ins_lda_absx(ReadTwoBytes()); // Tested
 			break;
 		case 0xC8:
-			Ins_inc_y(); // BAD -- doesn't handle overflow
+			Ins_inc_y(); // Tested
 			break;
 		case 0xC0:
 			Ins_cpy_imm(ReadMem(pc++)); // Tested
 			break;
 		case 0xCA:
-			Ins_dex(); // Bad -- doesn't handle Overflow
+			Ins_dex(); // Tested
 			break;
 		case 0xD0:
 			Ins_bne(ReadMem(pc++)); // Tested
 			break;
 		case 0xD8:
-			Ins_cld();
+			Ins_cld(); // Tested
 			break;
 		case 0xF0:
 			Ins_beq(ReadMem(pc++)); // Tested
@@ -190,7 +206,7 @@ void Emulator::Ins_rts() {
 
     // AAAAAAAAA00000000 or BBBBBBBB = AAAAAAAABBBBBBBB
     // plus 1 because return to the next instructionc
-	pc = ((msb << 8 ) | lsb) + 1;
+	pc = ((msb << 8 ) | lsb)+1;
 }
 
 void Emulator::Ins_jmp_abs(uint16_t destination) {
@@ -401,9 +417,15 @@ void Emulator::ExecuteInst_asl_zp_x()  //16", "SKIP", "REG", "OFFS")
 }
 
 
-void Emulator::ExecuteInst_asl_abs()  //0E", "SKIP", "REG", "SKIP")
+void Emulator::Ins_asl_abs(uint16_t address)  //0E", "SKIP", "REG", "SKIP")
 {
-	throw misc::Panic("Unimplemented instruction");
+	uint8_t value = ReadMem(address);
+	SetFlag((value & 0x80),FLAG_CARRY);
+	value <<= 1;
+	value &= 0xFF;
+	SetFlag((value & 0x80),FLAG_NEGATIVE);
+	SetFlag(!value,FLAG_ZERO);
+	WriteMem(address, value);
 }
 
 
@@ -411,11 +433,9 @@ void Emulator::Ins_asl_abs_x(uint16_t abs_addr)  //1E", "SKIP", "REG", "OFFS")
 {
 	uint16_t final_addr = (abs_addr + x);
 	uint8_t value = ReadMem(final_addr);
-	std::cout << "Pre  Shift Memory = " << std::bitset<8>(value) << std::endl;
 	SetFlag((value & 0x80),FLAG_CARRY);
 	value <<= 1;
 	value &= 0xFF;
-	std::cout << "Post Shift Memory = " << std::bitset<8>(value) << std::endl;
 	SetFlag((value & 0x80),FLAG_NEGATIVE);
 	SetFlag(!value,FLAG_ZERO);
 	WriteMem(final_addr, value);
@@ -621,9 +641,11 @@ void Emulator::ExecuteInst_dec_abs_x()  //DE", "SKIP", "REG", "OFFS")
 }
 
 
-void Emulator::ExecuteInst_eor_imm()  //49", "IME", "SKIP", "SKIP")
+void Emulator::Ins_eor_imm(uint8_t value)  //49", "IME", "SKIP", "SKIP")
 {
-	throw misc::Panic("Unimplemented instruction");
+	ac ^= value;
+	SetFlag((ac & 0x80) , FLAG_NEGATIVE);
+	SetFlag((ac == 0) , FLAG_ZERO);
 }
 
 
@@ -962,7 +984,12 @@ void Emulator::ExecuteInst_txa_x_a()  //8A", "SKIP", "SKIP", "SKIP")
 
 void Emulator::Ins_dex()  //CA", "SKIP", "SKIP", "SKIP")
 {
-	x--;
+	if (x == 0x00) {
+		x = 0xFF;
+		SetFlag(1, FLAG_CARRY);
+	} else {
+		x--;
+	}
 	SetFlag((x & 0x80),FLAG_NEGATIVE);
     SetFlag((!x),FLAG_ZERO);
 }
@@ -977,6 +1004,8 @@ void Emulator::ExecuteInst_inx_x()  //E8", "SKIP", "SKIP", "SKIP")
 void Emulator::Ins_tay()  //A8", "SKIP", "SKIP", "SKIP")
 {
 	y = ac;
+	SetFlag((y & 0x80), FLAG_NEGATIVE);
+    SetFlag(!y, FLAG_ZERO);
 }
 
 
@@ -1132,9 +1161,9 @@ void Emulator::ExecuteInst_sta_zp_x()  //95", "SKIP", "REG", "OFFS")
 }
 
 
-void Emulator::ExecuteInst_sta_abs()  //8D", "SKIP", "REG", "SKIP")
+void Emulator::Ins_sta_abs(uint16_t address)  //8D", "SKIP", "REG", "SKIP")
 {
-	throw misc::Panic("Unimplemented instruction");
+	WriteMem(address, ac);
 }
 
 
@@ -1206,9 +1235,9 @@ void Emulator::ExecuteInst_plp_x_sp()  //28", "SKIP", "SKIP", "SKIP")
 }
 
 
-void Emulator::ExecuteInst_stx_zp()  //86", "SKIP", "REG", "SKIP")
+void Emulator::Ins_stx_zp(uint8_t address)  //86", "SKIP", "REG", "SKIP")
 {
-	throw misc::Panic("Unimplemented instruction");
+	WriteMem(address, x);
 }
 
 
@@ -1218,9 +1247,9 @@ void Emulator::ExecuteInst_stx_zp_x()  //96", "SKIP", "REG", "OFFS")
 }
 
 
-void Emulator::ExecuteInst_stx_abs()  //8e", "SKIP", "REG", "SKIP")
+void Emulator::Ins_stx_abs(uint16_t address)  //8e", "SKIP", "REG", "SKIP")
 {
-	throw misc::Panic("Unimplemented instruction");
+	WriteMem(address, x);
 }
 
 
