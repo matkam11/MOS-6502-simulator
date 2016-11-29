@@ -331,6 +331,26 @@ TEST(instructions, Logical) {
 	uint16_t base_addr = 0;
     Emulator emu(base_addr);
 
+    emu.ac = 0b01010101;
+    emu.x =  0x10;
+    emu.WriteMem(0x30, 0x10);
+    emu.WriteMem(0x31, 0x30);
+    emu.WriteMem(0x3010, 0b10100000);
+    emu.Ins_ora_ind_x(0x20);
+    EXPECT_EQ(0b11110101, emu.ac);
+    EXPECT_EQ(1, emu.TestFlag(FLAG_NEGATIVE));
+	EXPECT_EQ(0, emu.TestFlag(FLAG_ZERO));
+
+    emu.ac = 0b00000000;
+    emu.x =  0x10;
+    emu.WriteMem(0x30, 0x10);
+    emu.WriteMem(0x31, 0x30);
+    emu.WriteMem(0x3010, 0b00000000);
+    emu.Ins_ora_ind_x(0x20);
+    EXPECT_EQ(0b00000000, emu.ac);
+    EXPECT_EQ(0, emu.TestFlag(FLAG_NEGATIVE));
+    EXPECT_EQ(1, emu.TestFlag(FLAG_ZERO));
+
     // Test asl_acc() and that it sets the right flags
     emu.Ins_lda_imm(0x90);
     emu.Ins_asl_acc();
@@ -383,5 +403,33 @@ TEST(instructions, Logical) {
     emu.Ins_asl_zp(0x10);
     EXPECT_EQ(1, emu.TestFlag(FLAG_ZERO));
     EXPECT_EQ(0b00000000, emu.ReadMem(0x10));
+    emu.SetFlag(0, emu.TestFlag(FLAG_ZERO));   
+
+    // Test asl_abs_x() and that it sets the right flags
+    emu.WriteMem(0x1010,0x90);
+    emu.x = 0x10;
+    emu.Ins_asl_abs_x(0x1000);
+    EXPECT_EQ(1, emu.TestFlag(FLAG_CARRY));
+    EXPECT_EQ(0b00100000, emu.ReadMem(0x1010));
+    emu.SetFlag(0, emu.TestFlag(FLAG_CARRY));
+
+    emu.WriteMem(0x1010,0x80);
+    emu.Ins_asl_abs_x(0x1000);
+    EXPECT_EQ(1, emu.TestFlag(FLAG_CARRY));
+    EXPECT_EQ(1, emu.TestFlag(FLAG_ZERO));
+    EXPECT_EQ(0b00000000, emu.ReadMem(0x1010));
+    emu.SetFlag(0, emu.TestFlag(FLAG_CARRY));
+    emu.SetFlag(0, emu.TestFlag(FLAG_ZERO));
+
+    emu.WriteMem(0x1010,0x40);
+    emu.Ins_asl_abs_x(0x1000);
+    EXPECT_EQ(1, emu.TestFlag(FLAG_NEGATIVE));
+    EXPECT_EQ(0b10000000, emu.ReadMem(0x1010));
+    emu.SetFlag(0, emu.TestFlag(FLAG_NEGATIVE));    
+
+    emu.WriteMem(0x1010,0x00);
+    emu.Ins_asl_abs_x(0x1000);
+    EXPECT_EQ(1, emu.TestFlag(FLAG_ZERO));
+    EXPECT_EQ(0b00000000, emu.ReadMem(0x1010));
     emu.SetFlag(0, emu.TestFlag(FLAG_ZERO));   
 }

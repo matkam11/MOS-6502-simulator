@@ -32,7 +32,7 @@ bool Emulator::Decode(){
 	uint8_t opcode = ReadMem(pc++);
 	switch(opcode) {
 		case 0x01:
-			Ins_ora_ind_x(ReadMem(pc++));
+			Ins_ora_ind_x(ReadMem(pc++)); // Tested
 			break;
 		case 0x06:
 			Ins_asl_zp(ReadMem(pc++)); // Tested
@@ -47,16 +47,16 @@ bool Emulator::Decode(){
 			Ins_bpl(ReadMem(pc++)); // Tested
 			break;
 		case 0x1E:
-			Ins_asl_abs_x(ReadTwoBytes());
+			Ins_asl_abs_x(ReadTwoBytes()); // Tested
 			break;
 		case 0x20:
-			Ins_jsr(ReadTwoBytes());
+			Ins_jsr(ReadTwoBytes()); // Tested
 			break;
 		case 0x4C:
-			Ins_jmp_abs(ReadTwoBytes());
+			Ins_jmp_abs(ReadTwoBytes()); // Tested
 			break;
 		case 0x60:
-			Ins_rts();
+			Ins_rts(); // Tested?
 			break;
 		case 0x85:
 			Ins_sta_zp(ReadMem(pc++));
@@ -76,10 +76,10 @@ bool Emulator::Decode(){
 			Ins_ldx_imm(ReadMem(pc++)); // Tested
 			break;
 		case 0xA5:
-			Ins_lda_zer(ReadMem(pc++));
+			Ins_lda_zer(ReadMem(pc++)); // Tested
 			break;
 		case 0xA6:
-			Ins_ldx_zer(ReadMem(pc++)); 
+			Ins_ldx_zer(ReadMem(pc++)); // Tested
 		case 0xA8:
 			Ins_tay();
 			break;
@@ -87,22 +87,22 @@ bool Emulator::Decode(){
 			Ins_lda_imm(ReadMem(pc++)); // Tested
 			break;
 		case 0xAC:
-			Ins_ldy_abs(ReadTwoBytes());
+			Ins_ldy_abs(ReadTwoBytes()); // Tested
 			break;
 		case 0xB5:
-			Ins_lda_zerx(ReadMem(pc++));
+			Ins_lda_zerx(ReadMem(pc++)); // Tested
 			break;
 		case 0xBD:
-			Ins_lda_absx(ReadTwoBytes());
+			Ins_lda_absx(ReadTwoBytes()); // Tested
 			break;
 		case 0xC8:
-			Ins_inc_y();
+			Ins_inc_y(); // BAD -- doesn't handle overflow
 			break;
 		case 0xC0:
-			Ins_cpy_imm(ReadMem(pc++));
+			Ins_cpy_imm(ReadMem(pc++)); // Tested
 			break;
 		case 0xCA:
-			Ins_dex();
+			Ins_dex(); // Bad -- doesn't handle Overflow
 			break;
 		case 0xD0:
 			Ins_bne(ReadMem(pc++)); // Tested
@@ -409,7 +409,7 @@ void Emulator::ExecuteInst_asl_abs()  //0E", "SKIP", "REG", "SKIP")
 
 void Emulator::Ins_asl_abs_x(uint16_t abs_addr)  //1E", "SKIP", "REG", "OFFS")
 {
-	uint16_t final_addr = (abs_addr & x);
+	uint16_t final_addr = (abs_addr + x);
 	uint8_t value = ReadMem(final_addr);
 	std::cout << "Pre  Shift Memory = " << std::bitset<8>(value) << std::endl;
 	SetFlag((value & 0x80),FLAG_CARRY);
@@ -927,11 +927,18 @@ void Emulator::ExecuteInst_ora_abs_y()  //19", "SKIP", "REG", "OFFS")
 }
 
 
-void Emulator::Ins_ora_ind_x(uint8_t msb)  //01", "SKIP", "REG", "OFFS")
+void Emulator::Ins_ora_ind_x(uint8_t addr)  //01", "SKIP", "REG", "OFFS")
 {
-	uint16_t addr = ((msb << 8) | y);
-	uint8_t value = ReadMem(addr);
+	uint16_t address;
+	uint8_t value;
+	addr = (addr + x);
+	uint8_t lsb = ReadMem(addr++);
+	uint8_t msb = ReadMem(addr);
+	address = ((msb << 8 ) | lsb);
+	value = ReadMem(address);
 	ac |= value;
+	SetFlag((ac & 0x80), FLAG_NEGATIVE);
+    SetFlag(!ac, FLAG_ZERO);
 }
 
 
