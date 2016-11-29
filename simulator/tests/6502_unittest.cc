@@ -12,7 +12,7 @@ TEST(emulator_object_test, Suceess) {
 // Test that value is set correctly
 
 
-TEST(emulator_memory_test, Suceess) {
+TEST(emulator_meta, Memory) {
   // This test is named "Negative", and belongs to the "FactorialTest"
   // test case.
 	uint16_t base_addr = 0;
@@ -20,6 +20,11 @@ TEST(emulator_memory_test, Suceess) {
     emu.WriteMem(0x1000, 0x10);
     EXPECT_EQ(0xFF, emu.ReadMem(0x0000));
     EXPECT_EQ(0x10, emu.ReadMem(0x1000));
+}
+
+TEST(emulator_meta, Stack) {
+	uint16_t base_addr = 0;
+    Emulator emu(base_addr);
 
     // Test Memory with Stack. Also tests Stack Logic
     // Empty Stack
@@ -59,20 +64,47 @@ TEST(emulator_memory_test, Suceess) {
 
 	emu.Ins_ldx_imm(0x20);
     emu.Ins_txs_x_sp();
-    EXPECT_EQ(0xFD,emu.sp);
+    EXPECT_EQ(0xFE,emu.sp);
     EXPECT_EQ(emu.mem[0x1FF],0x20);
 }
+
+TEST(emulator_meta, Flags) {
+	uint16_t base_addr = 0;
+    Emulator emu(base_addr);
+    EXPECT_EQ(0b00100100, emu.sr);
+    EXPECT_EQ(1, emu.TestFlag(FLAG_INTERRUPT));
+
+    emu.SetFlag(1, FLAG_NEGATIVE);
+    EXPECT_EQ(0b10100100, emu.sr);
+    EXPECT_EQ(1, emu.TestFlag(FLAG_NEGATIVE));
+    emu.SetFlag(1, FLAG_CARRY);
+    EXPECT_EQ(0b10100101, emu.sr);
+    EXPECT_EQ(1, emu.TestFlag(FLAG_CARRY));
+    emu.SetFlag(0,FLAG_CARRY);
+    EXPECT_EQ(0b10100100, emu.sr);
+    EXPECT_EQ(0,emu.TestFlag(FLAG_CARRY));
+}
+
+TEST(instructions, Stack_Register) {
+	uint16_t base_addr = 0;
+    Emulator emu(base_addr);
+    EXPECT_EQ(0b00100100, emu.sr);
+    emu.SetFlag(1, FLAG_CARRY);
+    emu.Ins_php();
+	EXPECT_EQ(0b00100101, emu.ReadMem(0x01FF));
+
+}
+
 
 TEST(instructions, Jumps) {
 	uint16_t base_addr = 0x20FF;
     Emulator emu(base_addr);
     EXPECT_EQ(0x20FF, emu.pc);
-    emu.Ins_jsr(0x10FF);
+    emu.Ins_jsr(0x10FE);
     EXPECT_EQ(0x10FF, emu.pc);
     EXPECT_EQ(0x20, emu.ReadMem(0x1FF));
     EXPECT_EQ(0xFE, emu.ReadMem(0x1FE));
-    EXPECT_EQ(0x10FF, emu.pc);
-
+    
     emu.Ins_jmp_abs(0x15FF);
     EXPECT_EQ(0x15FF, emu.pc);
 
@@ -81,7 +113,33 @@ TEST(instructions, Jumps) {
     EXPECT_EQ(0x20FF, emu.pc);
 }
 
-TEST(instructions, loads) {
+TEST(instructions, Branches) {
+	uint16_t base_addr = 0x0040;
+    Emulator emu(base_addr);
+
+    emu.Ins_bpl(0x20);
+    EXPECT_EQ(0x60, emu.pc);
+    emu.Ins_bpl(0xB0);
+    EXPECT_EQ(0x10, emu.pc);
+
+    emu.SetFlag(1, FLAG_NEGATIVE);
+    emu.Ins_bpl(0x20);
+    EXPECT_EQ(0x10, emu.pc);
+    emu.SetFlag(0, FLAG_NEGATIVE);
+ 
+    emu.pc = 0x2040;
+    emu.Ins_bpl(0x20);
+    EXPECT_EQ(0x2060, emu.pc);
+    emu.Ins_bpl(0xB0);
+    EXPECT_EQ(0x2010, emu.pc);
+
+    emu.SetFlag(1, FLAG_NEGATIVE);
+    emu.Ins_bpl(0x20);
+    EXPECT_EQ(0x2010, emu.pc);
+    emu.SetFlag(0, FLAG_NEGATIVE);
+}
+
+TEST(instructions, Loads) {
 	uint16_t base_addr = 0x0000;
     Emulator emu(base_addr);
     emu.WriteMem(0x0020, 0x22);
@@ -156,34 +214,93 @@ TEST(instructions, loads) {
 
     // Test ldx_absy
     emu.Ins_ldy_imm(0x40);
-    emu.Ins_ldx_absy(0x20);
+    emu.Ins_ldx_absy(0x2000);
     EXPECT_EQ(0x24, emu.x);
     emu.Ins_ldy_imm(0x20);
-    emu.Ins_ldx_absy(0x20);
+    emu.Ins_ldx_absy(0x2000);
     EXPECT_EQ(0x23, emu.x);
 
     // Test ldy_absx
     emu.Ins_ldx_imm(0x40);
-    emu.Ins_ldy_absx(0x20);
+    emu.Ins_ldy_absx(0x2000);
     EXPECT_EQ(0x24, emu.y);
     emu.Ins_ldx_imm(0x20);
-    emu.Ins_ldy_absx(0x20);
+    emu.Ins_ldy_absx(0x2000);
     EXPECT_EQ(0x23, emu.y);
 
     // Test lda_absy
     emu.Ins_ldy_imm(0x40);
-    emu.Ins_lda_absy(0x20);
+    emu.Ins_lda_absy(0x2000);
     EXPECT_EQ(0x24, emu.ac);
     emu.Ins_ldy_imm(0x20);
-    emu.Ins_lda_absy(0x20);
+    emu.Ins_lda_absy(0x2000);
     EXPECT_EQ(0x23, emu.ac);
 
     // Test lda_absx
     emu.Ins_ldx_imm(0x40);
-    emu.Ins_lda_absx(0x20);
+    emu.Ins_lda_absx(0x2000);
     EXPECT_EQ(0x24, emu.ac);
     emu.Ins_ldx_imm(0x20);
-    emu.Ins_lda_absx(0x20);
+    emu.Ins_lda_absy(0x2000);
     EXPECT_EQ(0x23, emu.ac);
 
+}
+
+TEST(instructions, Logical) {
+	uint16_t base_addr = 0;
+    Emulator emu(base_addr);
+
+    // Test asl_acc() and that it sets the right flags
+    emu.Ins_lda_imm(0x90);
+    emu.Ins_asl_acc();
+    EXPECT_EQ(1, emu.TestFlag(FLAG_CARRY));
+    EXPECT_EQ(0b00100000, emu.ac);
+    emu.SetFlag(0, emu.TestFlag(FLAG_CARRY));
+
+    emu.Ins_lda_imm(0x80);
+    emu.Ins_asl_acc();
+    EXPECT_EQ(1, emu.TestFlag(FLAG_CARRY));
+    EXPECT_EQ(1, emu.TestFlag(FLAG_ZERO));
+    EXPECT_EQ(0b00000000, emu.ac);
+    emu.SetFlag(0, emu.TestFlag(FLAG_CARRY));
+    emu.SetFlag(0, emu.TestFlag(FLAG_ZERO));
+
+    emu.Ins_lda_imm(0x40);
+    emu.Ins_asl_acc();
+    EXPECT_EQ(1, emu.TestFlag(FLAG_NEGATIVE));
+    EXPECT_EQ(0b10000000, emu.ac);
+    emu.SetFlag(0, emu.TestFlag(FLAG_NEGATIVE));    
+
+    emu.Ins_lda_imm(0x00);
+    emu.Ins_asl_acc();
+    EXPECT_EQ(1, emu.TestFlag(FLAG_ZERO));
+    EXPECT_EQ(0b00000000, emu.ac);
+    emu.SetFlag(0, emu.TestFlag(FLAG_ZERO));    
+
+    // Test asl_acc_zp() and that it sets the right flags
+    emu.WriteMem(0x0010,0x90);
+    emu.Ins_asl_zp(0x10);
+    EXPECT_EQ(1, emu.TestFlag(FLAG_CARRY));
+    EXPECT_EQ(0b00100000, emu.ReadMem(0x10));
+    emu.SetFlag(0, emu.TestFlag(FLAG_CARRY));
+
+    emu.WriteMem(0x0010,0x80);
+    emu.Ins_asl_zp(0x10);
+    EXPECT_EQ(1, emu.TestFlag(FLAG_CARRY));
+    EXPECT_EQ(1, emu.TestFlag(FLAG_ZERO));
+    EXPECT_EQ(0b00000000, emu.ReadMem(0x10));
+    emu.SetFlag(0, emu.TestFlag(FLAG_CARRY));
+    emu.SetFlag(0, emu.TestFlag(FLAG_ZERO));
+
+    emu.WriteMem(0x0010,0x40);
+    emu.Ins_asl_zp(0x10);
+    EXPECT_EQ(1, emu.TestFlag(FLAG_NEGATIVE));
+    EXPECT_EQ(0b10000000, emu.ReadMem(0x10));
+    emu.SetFlag(0, emu.TestFlag(FLAG_NEGATIVE));    
+
+    emu.WriteMem(0x0010,0x00);
+    emu.Ins_asl_zp(0x10);
+    EXPECT_EQ(1, emu.TestFlag(FLAG_ZERO));
+    EXPECT_EQ(0b00000000, emu.ReadMem(0x10));
+    emu.SetFlag(0, emu.TestFlag(FLAG_ZERO));   
 }

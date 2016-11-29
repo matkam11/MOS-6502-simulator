@@ -34,6 +34,9 @@ bool Emulator::Decode(){
 		case 0x01:
 			Ins_ora_ind_x(ReadMem(pc++));
 			break;
+		case 0x06:
+			Ins_asl_zp(ReadMem(pc++));
+			break;
 		case 0x08:
 			Ins_php();
 			break;
@@ -118,16 +121,16 @@ bool Emulator::Decode(){
 }
 
 void Emulator::SetFlag(bool set, uint8_t Flag) {
-	std::cout << "Status Register: SV BDIZC" << std::endl;
-	std::cout << "Status Register: " << std::bitset<8>(sr) << std::endl;
-	std::cout << "Setting Flag: " << std::bitset<8>(Flag) << " To Value: " << set << std::endl;
+	// std::cout << "Status Register: SV BDIZC" << std::endl;
+	// std::cout << "Status Register: " << std::bitset<8>(sr) << std::endl;
+	// std::cout << "Setting Flag: " << std::bitset<8>(Flag) << " To Value: " << set << std::endl;
 	if (set) {
 		sr |= Flag;
 	} else {
 		sr &= (0xFF - Flag);
 	}
-	std::cout << "Status Register: SV BDIZC" << std::endl;
-	std::cout << "Status Register: " << std::bitset<8>(sr) << std::endl;
+	// std::cout << "Status Register: SV BDIZC" << std::endl;
+	// std::cout << "Status Register: " << std::bitset<8>(sr) << std::endl;
 }
 
 bool Emulator::TestFlag(uint8_t Flag) {
@@ -246,13 +249,13 @@ void Emulator::Ins_lda_abs(uint16_t addr) {
 	ac = Emulator::ReadMem(addr);
 }
 
-void Emulator::Ins_ldx_absy(uint8_t msb) {
-	uint16_t addr = ((msb << 8) | y);
+void Emulator::Ins_ldx_absy(uint16_t addr) {
+	addr += y;
 	x = Emulator::ReadMem(addr);
 }
 
-void Emulator::Ins_ldy_absx(uint8_t msb) {
-	uint16_t addr = ((msb << 8) | x);
+void Emulator::Ins_ldy_absx(uint16_t addr) {
+	addr += x;
 	y = Emulator::ReadMem(addr);
 }
 
@@ -261,8 +264,8 @@ void Emulator::Ins_lda_absx(uint16_t addr) {
 	ac = Emulator::ReadMem(addr);
 }
 
-void Emulator::Ins_lda_absy(uint8_t msb) {
-	uint16_t addr = ((msb << 8) | y);
+void Emulator::Ins_lda_absy(uint16_t addr) {
+	addr += y;
 	ac = Emulator::ReadMem(addr);
 }
 
@@ -364,22 +367,29 @@ void Emulator::ExecuteInst_and_ind_y()  //31", "SKIP", "REG", "OFFS")
 
 void Emulator::Ins_asl_acc()  //0A", "SKIP", "SKIP", "SKIP")
 {
-	std::cout << "Pre  Shift Accumulator = " << std::bitset<8>(ac) << std::endl;
+	// std::cout << "Pre  Shift Accumulator = " << std::bitset<8>(ac) << std::endl;
 	SetFlag((ac & 0x80),FLAG_CARRY);
 	ac <<= 1;
 	ac &= 0xFF;
-	std::cout << "Post Shift Accumulator = " << std::bitset<8>(ac) << std::endl;
+	// std::cout << "Post Shift Accumulator = " << std::bitset<8>(ac) << std::endl;
 	SetFlag((ac & 0x80),FLAG_NEGATIVE);
 	SetFlag(!ac,FLAG_ZERO);
-	std::cout << "Status Register: SV BDIZC" << std::endl;
-	std::cout << "Status Register: " << std::bitset<8>(sr) << std::endl;
+	// std::cout << "Status Register: SV BDIZC" << std::endl;
+	// std::cout << "Status Register: " << std::bitset<8>(sr) << std::endl;
 
 }
 
 
-void Emulator::ExecuteInst_asl_zp()  //06", "SKIP", "REG", "SKIP")
+void Emulator::Ins_asl_zp(uint8_t zero_addr)  //06", "SKIP", "REG", "SKIP")
 {
-	throw misc::Panic("Unimplemented instruction");
+	uint16_t value = ReadMem(zero_addr);
+	SetFlag((value & 0x80),FLAG_CARRY);
+	value <<= 1;
+	value &= 0xFF;
+	// std::cout << "Post Shift Accumulator = " << std::bitset<8>(ac) << std::endl;
+	SetFlag((value & 0x80),FLAG_NEGATIVE);
+	SetFlag(!value,FLAG_ZERO);
+	WriteMem(zero_addr, value);
 }
 
 
@@ -424,20 +434,20 @@ void Emulator::ExecuteInst_bit_abs()  //2C", "SKIP", "REG", "SKIP")
 
 void Emulator::Ins_bpl(uint8_t rel_address)  //10", "SKIP", "SKIP", "SKIP")
 {
-	std::cout << "BRANCH Positive" << std::endl;
-	std::cout << "Status Register: SV BDIZC" << std::endl;
-	std::cout << "Status Register: " << std::bitset<8>(sr) << std::endl;
+	// std::cout << "BRANCH Positive" << std::endl;
+	// std::cout << "Status Register: SV BDIZC" << std::endl;
+	// std::cout << "Status Register: " << std::bitset<8>(sr) << std::endl;
 	if (!TestFlag(FLAG_NEGATIVE)) {
 	    uint8_t lsb, msb;
 	    uint16_t destination;
-	    std::cout << "Relative Address: " << (int) rel_address << std::endl;
+	    // std::cout << "Relative Address: " << (int) rel_address << std::endl;
 	    msb = ((pc >> 8) & 0xFF);
 	    lsb = (pc & 0xFF);
-	    std::cout << "Values: " << (int) lsb << " " << (int) msb <<  std::endl;
+	    // std::cout << "Values: " << (int) lsb << " " << (int) msb <<  std::endl;
 	    lsb = ((lsb + rel_address)%0x100);
-	    std::cout << "Value: " << (int) lsb << std::endl;
+	    // std::cout << "Value: " << (int) lsb << std::endl;
 	    destination = ((msb << 8) | lsb);
-	    std::cout << "destination: " << destination << std::endl;
+	    // std::cout << "destination: " << destination << std::endl;
 		pc = destination;
 		// //pc = pc + rel_address;
 	}

@@ -73,10 +73,10 @@ class Emulator {
     void Ins_ldy_abs(uint16_t addr);
     void Ins_lda_abs(uint16_t addr);
 
-    void Ins_ldx_absy(uint8_t addr);
-    void Ins_ldy_absx(uint8_t addr);
+    void Ins_ldx_absy(uint16_t addr);
+    void Ins_ldy_absx(uint16_t addr);
     void Ins_lda_absx(uint16_t addr);
-    void Ins_lda_absy(uint8_t addr);
+    void Ins_lda_absy(uint16_t addr);
 
 	void ExecuteInst_adc_imm();  // "0x69", "IME", "SKIP", "SKIP");
 	void ExecuteInst_adc_zp();  // "0x65", "SKIP", "REG", "SKIP");
@@ -95,7 +95,7 @@ class Emulator {
 	void ExecuteInst_and_ind_x();  // "0x21", "SKIP", "REG", "OFFS");
 	void ExecuteInst_and_ind_y();  // "0x31", "SKIP", "REG", "OFFS");
 	void Ins_asl_acc();  // "0x0A", "SKIP", "SKIP", "SKIP");
-	void ExecuteInst_asl_zp();  // "0x06", "SKIP", "REG", "SKIP");
+	void Ins_asl_zp(uint8_t zero_addr);  // "0x06", "SKIP", "REG", "SKIP");
 	void ExecuteInst_asl_zp_x();  // "0x16", "SKIP", "REG", "OFFS");
 	void ExecuteInst_asl_abs();  // "0x0E", "SKIP", "REG", "SKIP");
 	void Ins_asl_abs_x(uint16_t abs_addr);  // "0x1E", "SKIP", "REG", "OFFS");
