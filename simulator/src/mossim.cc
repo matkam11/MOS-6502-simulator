@@ -57,13 +57,13 @@ void MainLoop()
 {
         // Activate signal handler
         //simulation_engine::Engine *esim = esim::Engine::getInstance();
-        uint16_t base_addr = 0x0800;
+        uint16_t base_addr = 0xBFF0;
         uint16_t i = base_addr;
-        base_addr = 0x0804;
+        base_addr = 0xBFFF;
         char byte;
         Emulator emu(base_addr);
         std::ifstream inputBinary;
-        inputBinary.open("fibonacci", std::ios::in | std::ios::binary);
+        inputBinary.open("nestest.nes", std::ios::in | std::ios::binary);
         while (inputBinary.good()) {
             inputBinary.read(&byte,1);
             //inputBinary >> std::setw(2) >> std::setprecision(2) >> std::hex >> byte;

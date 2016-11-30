@@ -110,17 +110,19 @@ TEST(instructions, Jumps) {
 	uint16_t base_addr = 0x20FF;
     Emulator emu(base_addr);
     EXPECT_EQ(0x20FF, emu.pc);
+    emu.pc++;
+    emu.pc++;
     emu.Ins_jsr(0x10FF);
     EXPECT_EQ(0x10FF, emu.pc);
-    EXPECT_EQ(0x20, emu.ReadMem(0x1FF));
-    EXPECT_EQ(0xFE, emu.ReadMem(0x1FE));
+    EXPECT_EQ(0x21, emu.ReadMem(0x1FF)); // Verify Stack
+    EXPECT_EQ(0x00, emu.ReadMem(0x1FE)); //	Verift Stack
     
     emu.Ins_jmp_abs(0x15FF);
     EXPECT_EQ(0x15FF, emu.pc);
 
     emu.Ins_rts();
     EXPECT_EQ(0xFF, emu.sp);
-    EXPECT_EQ(0x20FF, emu.pc);
+    EXPECT_EQ(0x2101, emu.pc);
 }
 
 TEST(instructions, Math) {
@@ -150,20 +152,37 @@ TEST(instructions, Math) {
     EXPECT_EQ(0x1F, emu.x);
     EXPECT_EQ(0, emu.TestFlag(FLAG_ZERO));
     EXPECT_EQ(0, emu.TestFlag(FLAG_NEGATIVE));
-    EXPECT_EQ(0, emu.TestFlag(FLAG_CARRY));
-
+ 
     emu.x = 0x01;
     emu.Ins_dex();
     EXPECT_EQ(0x00, emu.x);
     EXPECT_EQ(1, emu.TestFlag(FLAG_ZERO));
     EXPECT_EQ(0, emu.TestFlag(FLAG_NEGATIVE));
-    EXPECT_EQ(0, emu.TestFlag(FLAG_CARRY));
 
+    emu.x = 0x90;
     emu.Ins_dex();
-    EXPECT_EQ(0xFF, emu.x);
+    EXPECT_EQ(0x8F, emu.x);
     EXPECT_EQ(0, emu.TestFlag(FLAG_ZERO));
     EXPECT_EQ(1, emu.TestFlag(FLAG_NEGATIVE));
-    EXPECT_EQ(1, emu.TestFlag(FLAG_CARRY));
+
+    // Test Ins_dey
+    emu.y = 0x20;
+    emu.Ins_dey();
+    EXPECT_EQ(0x1F, emu.y);
+    EXPECT_EQ(0, emu.TestFlag(FLAG_ZERO));
+    EXPECT_EQ(0, emu.TestFlag(FLAG_NEGATIVE));
+
+    emu.y = 0x01;
+    emu.Ins_dey();
+    EXPECT_EQ(0x00, emu.y);
+    EXPECT_EQ(1, emu.TestFlag(FLAG_ZERO));
+    EXPECT_EQ(0, emu.TestFlag(FLAG_NEGATIVE));
+
+    emu.y = 0x90;
+    emu.Ins_dey();
+    EXPECT_EQ(0x8F, emu.y);
+    EXPECT_EQ(0, emu.TestFlag(FLAG_ZERO));
+    EXPECT_EQ(1, emu.TestFlag(FLAG_NEGATIVE));
     
 }
 
