@@ -79,7 +79,7 @@ class Emulator {
     void Ins_lda_absx(uint16_t addr);
     void Ins_lda_absy(uint16_t addr);
 
-	void ExecuteInst_adc_imm();  // "0x69", "IME", "SKIP", "SKIP");
+	void Ins_adc_imm(uint8_t value);  // "0x69", "IME", "SKIP", "SKIP");
 	void ExecuteInst_adc_zp();  // "0x65", "SKIP", "REG", "SKIP");
 	void ExecuteInst_adc_zp_x();  // "0x75", "SKIP", "REG", "OFFS");
 	void ExecuteInst_adc_abs();  // "0x6D", "SKIP", "REG", "SKIP");
@@ -111,10 +111,10 @@ class Emulator {
 	void Ins_bne(uint8_t rel_address);  // "0xD0", "SKIP", "SKIP", "SKIP");
 	void Ins_beq(uint8_t rel_address);  // "0xF0", "SKIP", "SKIP", "SKIP");
 	void ExecuteInst_brk();  // "0x00", "SKIP", "SKIP", "SKIP");
-	void ExecuteInst_cmp_imm();  // "0xC9", "IME", "SKIP", "SKIP");
-	void ExecuteInst_cmp_zp();  // "0xC5", "SKIP", "REG", "SKIP");
+	void Ins_cmp_imm(uint8_t value);  // "0xC9", "IME", "SKIP", "SKIP");
+	void Ins_cmp_zp(uint8_t zero_addr);  // "0xC5", "SKIP", "REG", "SKIP");
 	void ExecuteInst_cmp_zp_x();  // "0xD5", "SKIP", "REG", "OFFS");
-	void ExecuteInst_cmp_abs();  // "0xCD", "SKIP", "REG", "SKIP");
+	void Ins_cmp_abs(uint16_t address);  // "0xCD", "SKIP", "REG", "SKIP");
 	void ExecuteInst_cmp_abs_x();  // "0xDD", "SKIP", "REG", "OFFS");
 	void ExecuteInst_cmp_abs_y();  // "0xD9", "SKIP", "REG", "OFFS");
 	void ExecuteInst_cmp_ind_x();  // "0xC1", "SKIP", "REG", "OFFS");

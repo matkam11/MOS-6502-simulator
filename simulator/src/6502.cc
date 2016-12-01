@@ -34,23 +34,25 @@ void Emulator::PrintStack() {
 		std::cout << (int) ReadMem(stack_base + i) << " ";
 	}
 	std::cout << std::endl;
-	std::cout << "AC X  Y  " << std::endl;
-	std::cout << std::setw(2) << (int) ac << " " << (int) x << " " << (int) y <<  std::endl;
-	std::cout << "Status Register: SV BDIZC" << std::endl;
-	std::cout << "Status Register: " << std::bitset<8>(sr) << std::endl;	
+	//std::cout << "AC X  Y  " << std::endl;
+	//	std::cout << std::setfill('0') << std::setw(2) << std::hex << "A: " << std::setfill('0') << std::setw(2) <<  ac << " X: " << (int) x << " Y: " << (int) y << " SR: " << (int) sr << std::endl;
+	//std::cout << "Status Register: SV BDIZC" << std::endl;
+	//std::cout << "Status Register: " << std::bitset<8>(sr) << std::endl;	
 
 }
 
 bool Emulator::Decode(){
 	PrintStack();
 	uint8_t opcode = ReadMem(++pc);
-	std::cout << std::hex << "Begin Decode... Opcode " << (int) ReadMem(pc) <<" @" << pc << std::endl;
+	std::cout << std::hex << "Begin Decode... Opcode " << (int) ReadMem(pc) <<" @" << pc << "         ";
+	std::cout  << "A: " <<(int) ac << " X: " << (int) x << " Y: " << (int) y << " SR: " << (int) sr << std::endl;
+
 	switch(opcode) {
 		case 0x00:
 			return false;
 			break;
 		case 0x01:
-			std::cout << "Or Acc Indirect X" << std::endl;
+			//std::cout << "Or Acc Indirect X" << std::endl;
 			Ins_ora_ind_x(ReadMem(++pc)); // Tested
 			break;
 		case 0x06:
@@ -69,7 +71,7 @@ bool Emulator::Decode(){
 			Ins_asl_abs(ReadTwoBytes()); // Tested
 			break;
 		case 0x10:
-			std::cout << "Branch Positive" << std::endl;
+			//std::cout << "Branch Positive" << std::endl;
 			Ins_bpl(ReadMem(++pc)); // Tested
 			break;
 		case 0x18:
@@ -79,7 +81,7 @@ bool Emulator::Decode(){
 			Ins_asl_abs_x(ReadTwoBytes()); // Tested
 			break;
 		case 0x20:
-			std::cout << "JSR" << std::endl;
+			//std::cout << "JSR" << std::endl;
 			Ins_jsr(ReadTwoBytes()); // Tested
 			break;
 		case 0x24:
@@ -104,7 +106,7 @@ bool Emulator::Decode(){
 			Ins_eor_imm(ReadMem(++pc));
 			break;
 		case 0x4C:
-			std::cout << "JMP Abs" << std::endl;
+			//std::cout << "JMP Abs" << std::endl;
 			Ins_jmp_abs(ReadTwoBytes()); // Tested
 			break;
 		case 0x50:
@@ -114,7 +116,7 @@ bool Emulator::Decode(){
 			Ins_cli();
 			break;
 		case 0x60:
-			std::cout << "Return to Subroutine" << std::endl;
+			//std::cout << "Return to Subroutine" << std::endl;
 			Ins_rts(); // Tested?
 			break;
 		case 0x68:
@@ -135,7 +137,7 @@ bool Emulator::Decode(){
 			Ins_stx_zp(ReadMem(++pc));
 			break;
 		case 0x88:
-			std::cout << "Decrement Y" << std::endl;
+			//std::cout << "Decrement Y" << std::endl;
 			Ins_dey();
 			break;
 		case 0x8C:
@@ -178,7 +180,7 @@ bool Emulator::Decode(){
 			Ins_lda_imm(ReadMem(++pc)); // Tested
 			break;
 		case 0xAC:
-			std::cout << "Ldy abs " << (int) ReadMem((pc+2)) << (int) ReadMem((pc+1)) << std::endl;
+			//std::cout << "Ldy abs " << (int) ReadMem((pc+2)) << (int) ReadMem((pc+1)) << std::endl;
 			Ins_ldy_abs(ReadTwoBytes()); // Tested
 			break;
 		case 0xB0:
@@ -200,30 +202,33 @@ bool Emulator::Decode(){
 			std::cout << "Inc Y" << std::endl;
 			Ins_inc_y(); // Tested
 			break;
+		case 0xC9:
+			Ins_cmp_imm(ReadMem(++pc));
+			break;
 		case 0xC0:
-			std::cout << "Compare Y to immediate" << std::endl;
+			//std::cout << "Compare Y to immediate" << std::endl;
 			Ins_cpy_imm(ReadMem(++pc)); // Tested
 			break;
 		case 0xCA:
 			Ins_dex(); // Tested
 			break;
 		case 0xD0:
-			std::cout << "Branch If not Equal (!Zero Flag)" << std::endl;
+			//std::cout << "Branch If not Equal (!Zero Flag)" << std::endl;
 			Ins_bne(ReadMem(++pc)); // Tested
 			break;
 		case 0xD8:
 			Ins_cld(); // Tested
-			std::cout << "Clear Decimal Flag" << std::endl;
+			//std::cout << "Clear Decimal Flag" << std::endl;
 			break;
 		case 0xEA:
 			//NOP
-			std::cout << "NOP" << std::endl;
+			//std::cout << "NOP" << std::endl;
 			break;
 		case 0xF8:
-			Ins_sei();
+			Ins_sed();
 			break;
 		case 0xF0:
-			std::cout << "Branh if Equal (zero Flag)" << std::endl;
+			//std::cout << "Branh if Equal (zero Flag)" << std::endl;
 			Ins_beq(ReadMem(++pc)); // Tested
 			break;
 		default:
@@ -408,9 +413,28 @@ void Emulator::Ins_lda_absy(uint16_t addr) {
 	SetFlag(!ac,FLAG_ZERO);
 }
 
-void Emulator::ExecuteInst_adc_imm()  //69", "IME", "SKIP", "SKIP")
+void Emulator::Ins_adc_imm(uint8_t value)  //69", "IME", "SKIP", "SKIP")
 {
-	throw misc::Panic("Unimplemented instruction");
+	
+ //    unsigned int temp = src + AC + (IF_CARRY() ? 1 : 0);
+ //    SET_ZERO(temp & 0xff);	/* This is not valid in decimal mode */
+ //    if (IF_DECIMAL()) {
+ //        if (((AC & 0xf) + (src & 0xf) + (IF_CARRY() ? 1 : 0)) > 9) temp += 6;
+	// 		SET_SIGN(temp);
+	// SET_OVERFLOW(!((AC ^ src) & 0x80) && ((AC ^ temp) & 0x80));
+	// if (temp > 0x99) temp += 96;
+	// 	SET_CARRY(temp > 0x99);
+ //    } else {
+	// 	SET_SIGN(temp);
+	// 	SET_OVERFLOW(!((AC ^ src) & 0x80) && ((AC ^ temp) & 0x80));
+	// 	SET_CARRY(temp > 0xff);
+ //    }
+ //    AC = ((BYTE) temp);
+
+
+	// ac &= value;
+	// SetFlag((ac & 0x80),FLAG_NEGATIVE);
+	// SetFlag(!ac,FLAG_ZERO);
 }
 
 
@@ -569,9 +593,9 @@ void Emulator::Ins_bit_zp(uint8_t zero_addr)  //24", "SKIP", "REG", "SKIP")
 {
 	uint8_t value = ReadMem(zero_addr);
 	SetFlag((value & 0x80), FLAG_NEGATIVE);
-	SetFlag((value & 0x40), FLAG_CARRY);
+	SetFlag((value & 0x40), FLAG_OVERFLOW);
     value &= ac;
-    SetFlag((value == 0x00), FLAG_ZERO);
+    SetFlag((!value), FLAG_ZERO);
 }
 
 
@@ -611,7 +635,7 @@ void Emulator::Ins_bmi(uint8_t rel_address)  //30", "SKIP", "SKIP", "SKIP")
 
 void Emulator::Ins_bvc(uint8_t rel_address)  //50", "SKIP", "SKIP", "SKIP")
 {
-	if (!TestFlag(FLAG_CARRY)) {
+	if (!TestFlag(FLAG_OVERFLOW)) {
 		uint8_t lsb, msb;
 	    uint16_t destination;
 	    msb = ((pc >> 8) & 0xFF);
@@ -625,7 +649,7 @@ void Emulator::Ins_bvc(uint8_t rel_address)  //50", "SKIP", "SKIP", "SKIP")
 
 void Emulator::Ins_bvs(uint8_t rel_address)  //70", "SKIP", "SKIP", "SKIP")
 {
-	if (TestFlag(FLAG_CARRY)) {
+	if (TestFlag(FLAG_OVERFLOW)) {
 		uint8_t lsb, msb;
 	    uint16_t destination;
 	    msb = ((pc >> 8) & 0xFF);
@@ -680,7 +704,7 @@ void Emulator::Ins_bne(uint8_t rel_address)  //D0", "SKIP", "SKIP", "SKIP")
 
 void Emulator::Ins_beq(uint8_t rel_address)  //F0", "SKIP", "SKIP", "SKIP")
 {
-	std::cout << (int) TestFlag(FLAG_ZERO) << std::endl;
+	//std::cout << (int) TestFlag(FLAG_ZERO) << std::endl;
 	if (TestFlag(FLAG_ZERO)) {
 		uint8_t lsb, msb;
 	    uint16_t destination;
@@ -701,7 +725,7 @@ void Emulator::ExecuteInst_brk()  //00", "SKIP", "SKIP", "SKIP")
 void Emulator::Ins_cmp_imm(uint8_t value)  //C9", "IME", "SKIP", "SKIP")
 {
 	uint16_t result = ac - value;
-	SetFlag(((ac + value) > 0x100) , FLAG_CARRY);
+	SetFlag(((result) < 0x100) , FLAG_CARRY);
 	SetFlag((result & 0x80) , FLAG_NEGATIVE);
 	SetFlag((!result) , FLAG_ZERO);
 }
@@ -897,7 +921,7 @@ void Emulator::Ins_sei()  //78", "SKIP", "SKIP", "SKIP")
 
 void Emulator::Ins_clv()  //B8", "SKIP", "SKIP", "SKIP")
 {
-	SetFlag(0, FLAG_CARRY);
+	SetFlag(0, FLAG_OVERFLOW);
 }
 
 
@@ -907,7 +931,7 @@ void Emulator::Ins_cld()  //D8", "SKIP", "SKIP", "SKIP")
 }
 
 
-void Emulator::Ins_sed()  //D8", "SKIP", "SKIP", "SKIP")
+void Emulator::Ins_sed()  //F8", "SKIP", "SKIP", "SKIP")
 {
 	SetFlag(1, FLAG_DECIMAL);
 }
@@ -1270,18 +1294,24 @@ void Emulator::Ins_pha()  //48", "SKIP", "SKIP", "SKIP")
 void Emulator::Ins_pla()  //68", "SKIP", "SKIP", "SKIP")
 {
 	ac = StackPop();
+	SetFlag((ac & 0x80),FLAG_NEGATIVE);
+    SetFlag((!ac),FLAG_ZERO);	
 }
 
 
 void Emulator::Ins_php()  //08", "SKIP", "SKIP", "SKIP")
 {
+	SetFlag(1,FLAG_BREAK);
 	StackPush(sr);
+	SetFlag(0,FLAG_BREAK);
 }
 
 
 void Emulator::Ins_plp()  //28", "SKIP", "SKIP", "SKIP")
 {
 	sr = StackPop();
+	SetFlag(0,FLAG_BREAK);
+	SetFlag(1,0x20);
 }
 
 
@@ -1456,3 +1486,8 @@ void Emulator::Ins_sty_abs(uint16_t address)  //8C", "SKIP", "REG", "SKIP")
 // {
 // 	throw misc::Panic("Unimplemented instruction");
 // }
+
+// C7E9 Check Ac 6f != 7f // so  the 0x20 flag?
+// C800 Check Ac 64 != 74 // 0x68 opcode
+// C817 Check Ac 2f != 35 // 0x68 opcode
+
