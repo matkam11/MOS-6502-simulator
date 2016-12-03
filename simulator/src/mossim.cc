@@ -1,15 +1,48 @@
+/*
+ *  Multi2Sim
+ *  Copyright (C) 2013  Rafael Ubal (ubal@ece.neu.edu)
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
+
 
 #include <cstdlib>
 #include <iostream>
 #include <sys/time.h>
+#include <fstream>
+#include <iomanip>
+
 #include "Terminal.h"
 #include "String.h"
 #include "Error.h"
 #include "Misc.h"
 #include "6502.h"
-#include <fstream>
-#include <iomanip>
+#include "CommandLine.h"
+
 #define VERSION "0.01v"
+
+
+//
+// Configuration options
+//
+
+// Binary file for OpenCL runtime
+std::string mossim_binary_path;
+
+uint16_t base_addr = 0xBFF0;
+
 
 void WelcomeMessage(std::ostream &os)
 {
@@ -37,9 +70,79 @@ void WelcomeMessage(std::ostream &os)
 
 }
 
+// Load a program from the command line
+void LoadProgram(const std::vector<std::string> &arguments,
+                const std::vector<std::string> &environment = {},
+                const std::string &current_directory = "",
+                const std::string &stdin_file_name = "",
+                const std::string &stdout_file_name = "")
+{
+        // Skip if no program specified
+        if (arguments.size() == 0)
+                return;
+
+        // Choose emulator based on ELF header
+        std::string exe = misc::getFullPath(arguments[0], current_directory);
+        std::cout<<"Input file: "<< exe<<std::endl;
+
+        // Set a different base address?
+        //uint16_t base_addr = 0xBFF0;
+        //Emulator::getInstance().SetBaseAddr(base_addr);
+
+        uint16_t i = Emulator::getInstance().getPC();
+        base_addr = 0xBFFF;
+        char byte;
+
+        Emulator::getInstance().SetBaseAddr(base_addr);
+
+
+
+        std::ifstream inputBinary;
+        inputBinary.open(exe, std::ios::in | std::ios::binary);
+        while (inputBinary.good()) {
+            inputBinary.read(&byte,1);
+            //inputBinary >> std::setw(2) >> std::setprecision(2) >> std::hex >> byte;
+            Emulator::getInstance().WriteMem(i,byte);
+            i++;
+        }
+        inputBinary.close();
+
+}
+
+// Load programs from context configuration file
+void LoadPrograms()
+{
+        // Load command-line program
+        misc::CommandLine *command_line = misc::CommandLine::getInstance();
+        LoadProgram(command_line->getArguments());
+}
+
 void RegisterOptions()
 {
     // Parse the command line and set flags or file output names
+
+    // Set error message
+    misc::CommandLine *command_line = misc::CommandLine::getInstance();
+    command_line->setErrorMessage("\nPlease type 'm2s --help' for a list of "
+                    "valid Multi2Sim command-line options.");
+
+    // Set help message
+    command_line->setHelp("Syntax:"
+                    "\n\n"
+                    "$ mossim [<options>] [<exe>] [<args>]"
+                    "\n\n"
+                    "MosSim's command line can take a program "
+                    "executable <exe> as an argument, given as a binary "
+                    "file in any of the supported CPU architectures, and "
+                    "optionally followed by its arguments <args>. The "
+                    "following list of command-line options can be used "
+                    "for <options>:");
+
+
+    // Binary
+    command_line->RegisterString("--null <file>",
+                    mossim_binary_path,
+                    "Null");
 }
 
 void ProcessOptions()
@@ -55,26 +158,11 @@ void ProcessOptions()
 
 void MainLoop()
 {
-        // Activate signal handler
-        //simulation_engine::Engine *esim = esim::Engine::getInstance();
-        uint16_t base_addr = 0xBFF0;
-        uint16_t i = base_addr;
-        base_addr = 0xBFFF;
-        char byte;
-        Emulator emu(base_addr);
-        std::ifstream inputBinary;
-        inputBinary.open("nestest.nes", std::ios::in | std::ios::binary);
-        while (inputBinary.good()) {
-            inputBinary.read(&byte,1);
-            //inputBinary >> std::setw(2) >> std::setprecision(2) >> std::hex >> byte;
-            emu.WriteMem(i,byte);
-            i++;
-        }
-        inputBinary.close();
+
         // Simulation loop
         while (1/*!simulation_engine->hasFinished()*/)
         {
-            if (!emu.Decode()) {
+            if (!Emulator::getInstance().Decode()) {
                 break;
             }
                 // =============================================================
@@ -119,11 +207,16 @@ int MainProgram(int argc, char **argv)
         // Read command line
         RegisterOptions();
 
+        // Process command line. Return to C version of Multi2Sim if a
+        // command-line option was not recognized.
+        misc::CommandLine *command_line = misc::CommandLine::getInstance();
+        command_line->Process(argc, argv, false);
+
         // Process command line
         ProcessOptions();
 
         // Load programs
-        //LoadPrograms();
+        LoadPrograms();
 
         // Main simulation loop
         MainLoop();

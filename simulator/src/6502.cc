@@ -12,12 +12,23 @@
 #include <iomanip>
 #include <bitset>
 Emulator::Emulator(uint16_t pc_start) {
-	pc = pc_start;
+        pc = pc_start;
 	sr = FLAG_INTERRUPT | 0x20;
 	sp = 0xFF;
 	interrupt_waiting = 0x00;
 	memset(mem, 0xFF, MEMORY_SIZE);
-};
+}
+
+Emulator::Emulator():
+          pc(0X100)
+        , sr(FLAG_INTERRUPT | 0x20)
+        , interrupt_waiting(0x00)
+        , mem()
+
+        {
+            memset(mem, 0xFF, MEMORY_SIZE);
+        }
+
 
 uint16_t Emulator::ReadTwoBytes() {
     uint8_t lsb, msb;
@@ -250,7 +261,22 @@ void Emulator::SetFlag(bool set, uint8_t Flag) {
 		sr &= (0xFF - Flag);
 	}
 	// std::cout << "Status Register: SV BDIZC" << std::endl;
-	// std::cout << "Status Register: " << std::bitset<8>(sr) << std::endl;
+        // std::cout << "Status Register: " << std::bitset<8>(sr) << std::endl;
+}
+
+void Emulator::SetBaseAddr(const uint16_t& pc_start)
+{
+    SetPC(pc_start);
+}
+
+void Emulator::SetPC(const uint16_t& pc_pos)
+{
+    pc=pc_pos;
+}
+
+uint16_t Emulator::getPC()
+{
+    return pc;
 }
 
 bool Emulator::TestFlag(uint8_t Flag) {
@@ -259,12 +285,12 @@ bool Emulator::TestFlag(uint8_t Flag) {
 
 void Emulator::WriteMem(uint16_t address, uint8_t value) {
     mem[address] = value;
-};
+}
 
 uint8_t Emulator::ReadMem(uint16_t address) {
 	//std::cout << "Reading mem at address: " << address << std::endl;
 	return(mem[address]);
-};
+}
 
 
 /*
@@ -283,7 +309,7 @@ void Emulator::StackPush(uint8_t byte) {
 	} else {
 		sp --;
 	}
-};
+}
 
 uint8_t Emulator::StackPop() {
 	if(sp == 0xFF) {
@@ -292,14 +318,14 @@ uint8_t Emulator::StackPop() {
 		sp ++;
 	}
 	return Emulator::ReadMem(0x100 + sp);
-};
+}
 
 void Emulator::Ins_jsr(uint16_t destination) {
 	pc--;
     Emulator::StackPush((pc >> 8) & 0xFF);
     Emulator::StackPush(pc & 0xFF);
 	pc = destination-1;
-};
+}
 
 void Emulator::Ins_rts() {
 	uint8_t lsb, msb;
@@ -313,7 +339,7 @@ void Emulator::Ins_rts() {
 
 void Emulator::Ins_jmp_abs(uint16_t destination) {
 	pc = destination-1;
-};
+}
 
 //void Emulator::Ins_ldx()
 

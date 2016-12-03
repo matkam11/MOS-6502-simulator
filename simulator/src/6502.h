@@ -25,7 +25,22 @@
 // set if the emulator should wait for an interrupt before continuing
 #define EMU_FLAG_WAIT_FOR_INTERRUPT 0x02
 class Emulator {
-   public:
+
+/*Singleton approach for this class-------------------------------------------*/
+public:
+    static Emulator& getInstance()
+    {
+        static Emulator instance;
+        return instance;
+    }
+private:
+    Emulator();
+    Emulator(Emulator const&);
+    void operator=(Emulator const&);
+
+    Emulator(uint16_t pc_start);
+
+public:
     uint16_t pc;
     uint8_t x, y;
     uint8_t sp;
@@ -39,10 +54,12 @@ class Emulator {
     // the opcode of the last instruction run. for debugging only.
     uint8_t last_opcode;
 
-    Emulator(uint16_t pc_start);
     uint16_t ReadTwoBytes();
     bool Decode();
     void SetFlag(bool set, uint8_t Flag);
+    void SetBaseAddr(const uint16_t &pc_start);
+    uint16_t getPC();
+    void SetPC(const uint16_t &pc_pos);
     bool TestFlag(uint8_t Flag);
 
     void StackPush(uint8_t byte);
