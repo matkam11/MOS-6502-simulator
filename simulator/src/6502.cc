@@ -20,10 +20,11 @@
 
 // Configuration options
 uint16_t Emulator::base_addr = 0xBFF0;
+uint16_t Emulator::start_addr = 0xBFF0;
 bool Emulator::help = false;
 const std::string Emulator::help_message =
         "The begging of the execution of the emulator depends on its start\n"
-        "address. This start address defaults to: 0xBFF0, and can be changed\n"
+        "address. This base address defaults to: 0xBFF0, and can be changed\n"
         "with propper configuration options.\n"
         "\n";
 
@@ -37,8 +38,14 @@ void Emulator::RegisterOptions()
         command_line->setCategory("Emulator System");
 
         // Option sanity check
-        command_line->RegisterUInt16("--emu-base-address <interval>",
+        command_line->RegisterUInt16("--emu-base-address <address>",
                         base_addr,
+                        "This option sets the base address that is"
+                        "going to be First decoded.");
+
+        // Option sanity check
+        command_line->RegisterUInt16("--emu-start-address <address>",
+                        start_addr,
                         "This option sets the base address that is"
                         "going to be First decoded.");
 
@@ -52,7 +59,7 @@ void Emulator::RegisterOptions()
 
 void Emulator::ProcessOptions()
 {
-        SetBaseAddr(base_addr);
+        SetStartAddr(start_addr);
 
         // Show help message
         if (help)
@@ -74,7 +81,7 @@ Emulator::Emulator(uint16_t pc_start) {
 }
 
 Emulator::Emulator():
-          pc(base_addr)
+          pc(start_addr)
         , sr(FLAG_INTERRUPT | 0x20)
         , interrupt_waiting(0x00)
         , mem()
@@ -458,7 +465,7 @@ bool Emulator::Decode(){
 			Ins_cpy_imm(ReadMem(++pc)); // Tested
 			break;
 		case 0xC1:
-			Ins_cmp_ind_x(ReadMem(++pc));
+                        //Ins_cmp_ind_x(ReadMem(++pc));
 			break;
 		case 0xC4:
 			Ins_cpy_imm(Address_zp(ReadMem(++pc)));
@@ -535,7 +542,17 @@ void Emulator::SetFlag(bool set, uint8_t Flag) {
         // std::cout << "Status Register: " << std::bitset<8>(sr) << std::endl;
 }
 
-void Emulator::SetBaseAddr(const uint16_t& pc_start)
+uint16_t Emulator::GetStartAddr()
+{
+    return start_addr;
+}
+
+uint16_t Emulator::GetBaseAddr()
+{
+    return base_addr;
+}
+
+void Emulator::SetStartAddr(const uint16_t& pc_start)
 {
     SetPC(pc_start);
 }
@@ -545,7 +562,7 @@ void Emulator::SetPC(const uint16_t& pc_pos)
     pc=pc_pos;
 }
 
-uint16_t Emulator::getPC()
+uint16_t Emulator::GetPC()
 {
     return pc;
 }

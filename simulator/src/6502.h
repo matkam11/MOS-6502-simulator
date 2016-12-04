@@ -47,8 +47,11 @@ public:
     // Static fields
     //
 
-    // Base address to start execution
+    // Base address to load memory
     static uint16_t base_addr;
+
+    // Base address to start execution
+    static uint16_t start_addr;
 
     // Show emu help message
     static bool help;
@@ -73,9 +76,14 @@ public:
     uint16_t ReadTwoBytes();
     bool Decode();
     void SetFlag(bool set, uint8_t Flag);
-    void SetBaseAddr(const uint16_t &pc_start);
-    uint16_t getPC();
+
+
+    uint16_t GetStartAddr();
+    uint16_t GetBaseAddr();
+    void SetStartAddr(const uint16_t &pc_start);
+    uint16_t GetPC();
     void SetPC(const uint16_t &pc_pos);
+
     bool TestFlag(uint8_t Flag);
 
     void StackPush(uint8_t byte);

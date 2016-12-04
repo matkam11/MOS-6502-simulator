@@ -85,7 +85,7 @@ void LoadProgram(const std::vector<std::string> &arguments,
         std::string exe = misc::getFullPath(arguments[0], current_directory);
         std::cout<<"Input file: "<< exe<<std::endl;
 
-        uint16_t i = Emulator::getInstance().getPC();
+        uint16_t i = Emulator::getInstance().GetBaseAddr();
 
         char byte;
         std::ifstream inputBinary;
