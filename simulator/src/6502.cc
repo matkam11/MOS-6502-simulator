@@ -177,6 +177,7 @@ uint8_t inline & Emulator::Address_zp_x_ptr(uint8_t zero_addr) {
 
 
 uint8_t inline & Emulator::Address_abs_ptr(uint16_t address) {
+		std::cout << (int) ReadMem(address) << std::endl;
         return mem[address];
 }
 
@@ -267,7 +268,7 @@ bool Emulator::Decode(){
                   << std::setfill('0') << std::setw(2) << (int) y << " P:"
                   << std::setfill('0') << std::setw(2) << (int) sr << " SP:"
                   << std::setfill('0') << std::setw(2) << (int) sp << std::endl;
-  	MemoryWatch(0x0678);
+  	MemoryWatch(0x02FF);
 	switch(opcode) {
 		case 0x00:
 			return false;
@@ -358,7 +359,7 @@ bool Emulator::Decode(){
 			Ins_and(Address_abs_ptr(ReadTwoBytes()));
 			break;
 		case 0x2E:
-			Ins_rol(Address_abs_x_ptr(ReadTwoBytes()));
+			Ins_rol(Address_abs_ptr(ReadTwoBytes()));
 			break;
 		case 0x30:
 			Ins_bmi(ReadMem(++pc));
@@ -377,6 +378,9 @@ bool Emulator::Decode(){
 			break;
 		case 0x3D:
 			Ins_and(Address_abs_x_ptr(ReadTwoBytes()));
+			break;
+		case 0x3E: 
+			Ins_rol(Address_abs_x_ptr(ReadMem(++pc)));
 			break;
 		case 0x39:
 			Ins_and(Address_abs_y_ptr(ReadTwoBytes()));
@@ -454,6 +458,9 @@ bool Emulator::Decode(){
 			break;
 		case 0x6A:
 			Ins_ror(Address_acc_ptr());
+			break;
+		case 0x6C:
+			Ins_jmp_ind(ReadTwoBytes());;
 			break;
 		case 0x6E:
 			Ins_ror(Address_abs_ptr(ReadTwoBytes()));
@@ -825,6 +832,15 @@ void Emulator::Ins_jmp_abs(uint16_t destination) {
 	pc = destination-1;
 }
 
+void Emulator::Ins_jmp_ind(uint16_t address) {
+	uint8_t lsb,msb;
+	lsb = ReadMem(address++);
+	msb = ReadMem(address);
+
+    address = ((msb << 8 ) | lsb);
+	pc = address-1;
+}
+
 void Emulator::Ins_ldx(uint8_t & value) {
 	std::cout << (int) value << std::endl;
 	x = value;
@@ -1159,37 +1175,6 @@ void Emulator::Ins_inc(uint8_t &src)  //E6", "SKIP", "REG", "SKIP")
     src = value;
 }
 
-
-void Emulator::ExecuteInst_inc_zp_x()  //F6", "SKIP", "REG", "OFFS")
-{
-	throw misc::Panic("Unimplemented instruction");
-}
-
-
-void Emulator::ExecuteInst_inc_abs()  //EE", "SKIP", "REG", "SKIP")
-{
-	throw misc::Panic("Unimplemented instruction");
-}
-
-
-void Emulator::ExecuteInst_inc_abs_x()  //FE", "SKIP", "REG", "OFFS")
-{
-	throw misc::Panic("Unimplemented instruction");
-}
-
-
-void Emulator::ExecuteInst_jmp_abs()  //4C", "IME", "SKIP", "SKIP")
-{
-	throw misc::Panic("Unimplemented instruction");
-}
-
-
-void Emulator::ExecuteInst_jmp_ind()  //6C", "IME", "SKIP", "SKIP")
-{
-	throw misc::Panic("Unimplemented instruction");
-}
-
-
 void Emulator::ExecuteInst_jsr_abs()  //20", "IME", "SKIP", "SKIP")
 {
 	throw misc::Panic("Unimplemented instruction");
@@ -1247,12 +1232,16 @@ void Emulator::Ins_tya()  //98", "SKIP", "SKIP", "SKIP")
 void Emulator::Ins_rol(uint8_t &src)  //2A", "SKIP", "SKIP", "SKIP")
 {
     uint16_t tempValue = (uint16_t) src;
+	std::cout << (int) tempValue << std::endl;
+
     tempValue <<= 1;
+	std::cout << (int) tempValue << std::endl;
     if (TestFlag(FLAG_CARRY)) {
     	tempValue |= 0x01;
     }
     SetFlag((tempValue > 0xFF), FLAG_CARRY);
     tempValue &= 0xFF;
+	std::cout << (int) tempValue << std::endl;
     SetFlag((tempValue & 0x80), FLAG_NEGATIVE);
     SetFlag((!tempValue), FLAG_ZERO);
     src = tempValue;

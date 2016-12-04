@@ -122,6 +122,8 @@ public:
     void Ins_jsr(uint16_t destination);
     void Ins_rts();
     void Ins_jmp_abs(uint16_t destination);
+    void Ins_jmp_ind(uint16_t address);
+
 
     void Ins_ldx(uint8_t & value);
     void Ins_ldy(uint8_t & value);
@@ -174,11 +176,6 @@ public:
         void Ins_cld();  // "0xD8", "SKIP", "SKIP", "SKIP");
         void Ins_sed();  // "0xD8", "SKIP", "SKIP", "SKIP");
         void Ins_inc(uint8_t &src);  // "0xE6", "SKIP", "REG", "SKIP");
-        void ExecuteInst_inc_zp_x();  // "0xF6", "SKIP", "REG", "OFFS");
-        void ExecuteInst_inc_abs();  // "0xEE", "SKIP", "REG", "SKIP");
-        void ExecuteInst_inc_abs_x();  // "0xFE", "SKIP", "REG", "OFFS");
-        void ExecuteInst_jmp_abs();  // "0x4C", "IME", "SKIP", "SKIP");
-        void ExecuteInst_jmp_ind();  // "0x6C", "IME", "SKIP", "SKIP");
         void ExecuteInst_jsr_abs();  // "0x20", "IME", "SKIP", "SKIP");
         void Ins_lsr(uint8_t & src);  // "0x4A", "SKIP", "SKIP", "SKIP");
         void Ins_ora_imm(uint8_t value);  // "0x09", "IME", "SKIP", "SKIP");
