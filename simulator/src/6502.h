@@ -76,7 +76,7 @@ public:
     uint16_t ReadTwoBytes();
     bool Decode();
     void SetFlag(bool set, uint8_t Flag);
-
+    void MemoryWatch(uint16_t address);
 
     uint16_t GetStartAddr();
     uint16_t GetBaseAddr();

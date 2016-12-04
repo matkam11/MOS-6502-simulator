@@ -105,11 +105,9 @@ uint16_t Emulator::ReadTwoBytes() {
 }
 
 void Emulator::PrintStack() {
-
-
-        for (uint8_t i = 0xFF; i > sp; i--){
+	for (uint8_t i = 0xFF; i > sp; i--){
 		uint16_t stack_base = 0x0100;
-                std::cout << (int) ReadMem(stack_base + i) << " ";
+        std::cout << (int) ReadMem(stack_base + i) << " ";
 	}
 	std::cout << std::endl;
 	//std::cout << "AC X  Y  " << std::endl;
@@ -117,6 +115,11 @@ void Emulator::PrintStack() {
 	//std::cout << "Status Register: SV BDIZC" << std::endl;
 	//std::cout << "Status Register: " << std::bitset<8>(sr) << std::endl;	
 }
+
+void Emulator::MemoryWatch(uint16_t address) {
+	std::cout << "Value @ " << (int)address << " = " << (int) ReadMem(address) << std::endl;
+}
+
 
 void Emulator::PrintMem() {
 
@@ -157,8 +160,8 @@ uint8_t inline & Emulator::Address_y_ptr() {
 }
 
 uint8_t inline & Emulator::Address_zp_ptr(uint8_t zero_addr) {
-		std::cout << zero_addr << std::endl;
-    	std::cout << ReadMem((zero_addr)) << std::endl;
+		std::cout << (int) zero_addr << std::endl;
+    	std::cout << (int) ReadMem((zero_addr)) << std::endl;
         return mem[zero_addr];
 }
 
@@ -848,11 +851,12 @@ void Emulator::Ins_asl(uint8_t &src)  //0A", "SKIP", "SKIP", "SKIP")
 void Emulator::Ins_bit(uint8_t &src)  //24", "SKIP", "REG", "SKIP")
 {
 	std::cout << (int) src << std::endl;
-	SetFlag((src & 0x80), FLAG_NEGATIVE);
-	SetFlag((src & 0x40), FLAG_OVERFLOW);
-    src &= ac;
+	uint8_t tempValue = src;
+	SetFlag((tempValue & 0x80), FLAG_NEGATIVE);
+	SetFlag((tempValue & 0x40), FLAG_OVERFLOW);
+    tempValue &= ac;
 	std::cout << (int) src << std::endl;
-    SetFlag((!src), FLAG_ZERO);
+    SetFlag((!tempValue), FLAG_ZERO);
 }
 
 void Emulator::Ins_bpl(uint8_t rel_address)  //10", "SKIP", "SKIP", "SKIP")
