@@ -90,6 +90,12 @@ public:
     void RegisterOptions();
     void ProcessOptions();
 
+	uint8_t inline * Address_acc_ptr();
+	uint8_t inline * Address_zp_ptr(uint8_t zero_addr);
+	uint8_t inline * Address_abs_ptr(uint16_t address);
+	uint8_t inline * Address_abs_x_ptr(uint16_t address);
+	uint8_t inline Address_zp(uint8_t zero_addr);
+	uint8_t inline Address_ind_x(uint8_t start_address);
 
 
     void Ins_jsr(uint16_t destination);
@@ -100,13 +106,13 @@ public:
     void Ins_ldy_imm(uint8_t value);
     void Ins_lda_imm(uint8_t value);
 
-    void Ins_ldx_zer(uint8_t zero_addr);
-    void Ins_ldy_zer(uint8_t zero_addr);
-    void Ins_lda_zer(uint8_t zero_addr);
+    void Ins_ldx_zp(uint8_t zero_addr);
+    void Ins_ldy_zp(uint8_t zero_addr);
+    void Ins_lda_zp(uint8_t zero_addr);
 
-    void Ins_ldx_zery(uint8_t zero_addr);
-    void Ins_ldy_zerx(uint8_t zero_addr);
-    void Ins_lda_zerx(uint8_t zero_addr);
+    void Ins_ldx_zp_y(uint8_t zero_addr);
+    void Ins_ldy_zp_x(uint8_t zero_addr);
+    void Ins_lda_zp_x(uint8_t zero_addr);
 
     void Ins_ldx_abs(uint16_t addr);
     void Ins_ldy_abs(uint16_t addr);
@@ -117,13 +123,15 @@ public:
     void Ins_lda_absx(uint16_t addr);
     void Ins_lda_absy(uint16_t addr);
 
+    void Ins_lda_ind_x(uint8_t start_address);
+
 	void Ins_adc_imm(uint8_t value);  // "0x69", "IME", "SKIP", "SKIP");
 	void ExecuteInst_adc_zp();  // "0x65", "SKIP", "REG", "SKIP");
 	void ExecuteInst_adc_zp_x();  // "0x75", "SKIP", "REG", "OFFS");
 	void ExecuteInst_adc_abs();  // "0x6D", "SKIP", "REG", "SKIP");
 	void ExecuteInst_adc_abs_x();  // "0x7D", "SKIP", "REG", "OFFS");
 	void ExecuteInst_adc_abs_y();  // "0x79", "SKIP", "REG", "OFFS");
-	void ExecuteInst_adc_ind_x();  // "0x61", "SKIP", "REG", "OFFS");
+	void Ins_adc_ind_x(uint8_t start_address);  // "0x61", "SKIP", "REG", "OFFS");
 	void ExecuteInst_adc_ind_y();  // "0x71", "SKIP", "REG", "OFFS");
 	void Ins_and_imm(uint8_t value);  // "0x29", "IME", "SKIP", "SKIP");
 	void ExecuteInst_and_zp();  // "0x25", "SKIP", "REG", "SKIP");
@@ -131,10 +139,11 @@ public:
 	void ExecuteInst_and_abs();  // "0x2D", "SKIP", "REG", "SKIP");
 	void ExecuteInst_and_abs_x();  // "0x3D", "SKIP", "REG", "OFFS");
 	void ExecuteInst_and_abs_y();  // "0x39", "SKIP", "REG", "OFFS");
-	void ExecuteInst_and_ind_x();  // "0x21", "SKIP", "REG", "OFFS");
+	void Ins_and_ind_x(uint8_t start_address);  // "0x21", "SKIP", "REG", "OFFS");
 	void ExecuteInst_and_ind_y();  // "0x31", "SKIP", "REG", "OFFS");
-	void Ins_asl_acc();  // "0x0A", "SKIP", "SKIP", "SKIP");
-	void Ins_asl_zp(uint8_t zero_addr);  // "0x06", "SKIP", "REG", "SKIP");
+	void Ins_asl(uint8_t *src);  // "0x0A", "SKIP", "SKIP", "SKIP");
+	// void Ins_asl_acc();  // "0x0A", "SKIP", "SKIP", "SKIP");
+	// void Ins_asl_zp(uint8_t zero_addr);  // "0x06", "SKIP", "REG", "SKIP");
 	void ExecuteInst_asl_zp_x();  // "0x16", "SKIP", "REG", "OFFS");
 	void Ins_asl_abs(uint16_t address);  // "0x0E", "SKIP", "REG", "SKIP");
 	void Ins_asl_abs_x(uint16_t abs_addr);  // "0x1E", "SKIP", "REG", "OFFS");
@@ -155,9 +164,9 @@ public:
 	void Ins_cmp_abs(uint16_t address);  // "0xCD", "SKIP", "REG", "SKIP");
 	void ExecuteInst_cmp_abs_x();  // "0xDD", "SKIP", "REG", "OFFS");
 	void ExecuteInst_cmp_abs_y();  // "0xD9", "SKIP", "REG", "OFFS");
-	void ExecuteInst_cmp_ind_x();  // "0xC1", "SKIP", "REG", "OFFS");
+	void Ins_cmp_ind_x(uint8_t start_address);  // "0xC1", "SKIP", "REG", "OFFS");
 	void ExecuteInst_cmp_ind_y();  // "0xD1", "SKIP", "REG", "OFFS");
-	void ExecuteInst_cpx_imm();  // "0xE0", "IME", "SKIP", "SKIP");
+	void Ins_cpx_imm(uint8_t value);  // "0xE0", "IME", "SKIP", "SKIP");
 	void ExecuteInst_cpx_zp();  // "0xE4", "SKIP", "REG", "SKIP");
 	void ExecuteInst_cpx_abs();  // "0xEC", "SKIP", "REG", "SKIP");
 	void Ins_cpy_imm(uint8_t value);  // "0xC0", "IME", "SKIP", "SKIP");
@@ -173,7 +182,7 @@ public:
 	void ExecuteInst_eor_abs();  // "0x4D", "SKIP", "REG", "SKIP");
 	void ExecuteInst_eor_abs_x();  // "0x5D", "SKIP", "REG", "OFFS");
 	void ExecuteInst_eor_abs_y();  // "0x59", "SKIP", "REG", "OFFS");
-	void ExecuteInst_eor_ind_x();  // "0x41", "SKIP", "REG", "OFFS");
+	void Ins_eor_ind_x(uint8_t start_address);  // "0x41", "SKIP", "REG", "OFFS");
 	void ExecuteInst_eor_ind_y();  // "0x51", "SKIP", "REG", "OFFS");
 	void Ins_clc();  // "0x18", "SKIP", "SKIP", "SKIP");
 	void Ins_sec();  // "0x38", "SKIP", "SKIP", "SKIP");
@@ -189,53 +198,54 @@ public:
 	void ExecuteInst_jmp_abs();  // "0x4C", "IME", "SKIP", "SKIP");
 	void ExecuteInst_jmp_ind();  // "0x6C", "IME", "SKIP", "SKIP");
 	void ExecuteInst_jsr_abs();  // "0x20", "IME", "SKIP", "SKIP");
-	void ExecuteInst_lsr_acc();  // "0x4A", "SKIP", "SKIP", "SKIP");
-	void ExecuteInst_lsr_zp();  // "0x46", "SKIP", "REG", "SKIP");
+	void Ins_lsr_acc();  // "0x4A", "SKIP", "SKIP", "SKIP");
+	void Ins_lsr_zp(uint8_t zero_address);  // "0x46", "SKIP", "REG", "SKIP");
 	void ExecuteInst_lsr_zp_x();  // "0x56", "SKIP", "REG", "OFFS");
 	void ExecuteInst_lsr_abs();  // "0x4E", "SKIP", "REG", "SKIP");
 	void ExecuteInst_lsr_abs_x();  // "0x5E", "SKIP", "REG", "OFFS");
 	void Ins_ora_imm(uint8_t value);  // "0x09", "IME", "SKIP", "SKIP");
-	void ExecuteInst_ora_zp();  // "0x05", "SKIP", "REG", "SKIP");
+	// void ExecuteInst_ora_zp();  // "0x05", "SKIP", "REG", "SKIP");
 	void ExecuteInst_ora_zp_x();  // "0x15", "SKIP", "REG", "OFFS");
 	void ExecuteInst_ora_abs();  // "0x0D", "SKIP", "REG", "SKIP");
 	void ExecuteInst_ora_abs_x();  // "0x1D", "SKIP", "REG", "OFFS");
 	void ExecuteInst_ora_abs_y();  // "0x19", "SKIP", "REG", "OFFS");
-	void Ins_ora_ind_x(uint8_t msb);  // "0x01", "SKIP", "REG", "OFFS");
+	void Ins_ora_ind_x(uint8_t start_address);  // "0x01", "SKIP", "REG", "OFFS");
 	void ExecuteInst_ora_ind_y();  // "0x11", "SKIP", "REG", "OFFS");
-	void ExecuteInst_tax_a_x();  // "0xAA", "SKIP", "SKIP", "SKIP");
-	void ExecuteInst_txa_x_a();  // "0x8A", "SKIP", "SKIP", "SKIP");
+	void Ins_tax();  // "0xAA", "SKIP", "SKIP", "SKIP");
+	void Ins_txa();  // "0x8A", "SKIP", "SKIP", "SKIP");
 	void Ins_dex();  // "0xCA", "SKIP", "SKIP", "SKIP");
-	void ExecuteInst_inx_x();  // "0xE8", "SKIP", "SKIP", "SKIP");
+	void Ins_inx();  // "0xE8", "SKIP", "SKIP", "SKIP");
 	void Ins_tay();  // "0xA8", "SKIP", "SKIP", "SKIP");
-	void ExecuteInst_tya_y_a();  // "0x98", "SKIP", "SKIP", "SKIP");
+	void Ins_tya();  // "0x98", "SKIP", "SKIP", "SKIP");
 	void Ins_dey();  // "0x88", "SKIP", "SKIP", "SKIP");
 	void Ins_inc_y();  // "0xC8", "SKIP", "SKIP", "SKIP");
-	void ExecuteInst_rol_acc();  // "0x2A", "SKIP", "SKIP", "SKIP");
-	void ExecuteInst_rol_zp();  // "0x26", "SKIP", "REG", "SKIP");
+	void Ins_rol(uint8_t *src);
+	void Ins_rol_acc();  // "0x2A", "SKIP", "SKIP", "SKIP");
+	void Ins_rol_zp(uint8_t zero_address);  // "0x26", "SKIP", "REG", "SKIP");
 	void ExecuteInst_rol_zp_x();  // "0x36", "SKIP", "REG", "OFFS");
 	void ExecuteInst_rol_abs();  // "0x2E", "SKIP", "REG", "SKIP");
 	void ExecuteInst_rol_abs_x();  // "0x3E", "SKIP", "REG", "OFFS");
-	void ExecuteInst_ror_acc();  // "0x6A", "SKIP", "SKIP", "SKIP");
-	void ExecuteInst_ror_zp();  // "0x66", "SKIP", "REG", "SKIP");
+	void Ins_ror_acc();  // "0x6A", "SKIP", "SKIP", "SKIP");
+	void Ins_ror_zp(uint8_t zero_address);  // "0x66", "SKIP", "REG", "SKIP");
 	void ExecuteInst_ror_zp_x();  // "0x76", "SKIP", "REG", "OFFS");
-	void ExecuteInst_ror_abs();  // "0x6E", "SKIP", "REG", "SKIP");
+	void Ins_ror_abs(uint16_t address);  // "0x6E", "SKIP", "REG", "SKIP");
 	void ExecuteInst_ror_abs_x();  // "0x7E", "SKIP", "REG", "OFFS");
-	void ExecuteInst_rti();  // "0x40", "SKIP", "SKIP", "SKIP");
+	void Ins_rti();  // "0x40", "SKIP", "SKIP", "SKIP");
 	void ExecuteInst_rts();  // "0x60", "SKIP", "SKIP", "SKIP");
-	void ExecuteInst_sbc_imm();  // "0xE9", "IME", "SKIP", "SKIP");
+	void Ins_sbc_imm(uint8_t value);  // "0xE9", "IME", "SKIP", "SKIP");
 	void ExecuteInst_sbc_zp();  // "0xE5", "SKIP", "REG", "SKIP");
 	void ExecuteInst_sbc_zp_x();  // "0xF5", "SKIP", "REG", "OFFS");
 	void ExecuteInst_sbc_abs();  // "0xED", "SKIP", "REG", "SKIP");
 	void ExecuteInst_sbc_abs_x();  // "0xFD", "SKIP", "REG", "OFFS");
 	void ExecuteInst_sbc_abs_y();  // "0xF9", "SKIP", "REG", "OFFS");
-	void ExecuteInst_sbc_ind_x();  // "0xE1", "SKIP", "REG", "OFFS");
+	void Ins_sbc_ind_x(uint8_t start_address);  // "0xE1", "SKIP", "REG", "OFFS");
 	void ExecuteInst_sbc_ind_y();  // "0xF1", "SKIP", "REG", "OFFS");
 	void Ins_sta_zp(uint8_t zero_addr);  // "0x85", "SKIP", "REG", "SKIP");
 	void ExecuteInst_sta_zp_x();  // "0x95", "SKIP", "REG", "OFFS");
 	void Ins_sta_abs(uint16_t address);  // "0x8D", "SKIP", "REG", "SKIP");
 	void Ins_sta_abs_x(uint16_t address);  // "0x9D", "SKIP", "REG", "OFFS");
 	void ExecuteInst_sta_abs_y();  // "0x99", "SKIP", "REG", "OFFS");
-	void ExecuteInst_sta_ind_x();  // "0x81", "SKIP", "REG", "OFFS");
+	void Ins_sta_ind_x(uint8_t start_address);  // "0x81", "SKIP", "REG", "OFFS");
 	void Ins_sta_ind_y(uint8_t start_address);  // "0x91", "SKIP", "REG", "OFFS");
 	void Ins_txs_x_sp();  // "0x9A", "SKIP", "SKIP", "SKIP");
 	void Ins_tsx();  // "0xBA", "SKIP", "SKIP", "SKIP");
@@ -246,9 +256,11 @@ public:
 	void Ins_stx_zp(uint8_t address);  // "0x86", "SKIP", "REG", "SKIP");
 	void ExecuteInst_stx_zp_x();  // "0x96", "SKIP", "REG", "OFFS");
 	void Ins_stx_abs(uint16_t address);  // "0x8e", "SKIP", "REG", "SKIP");
-	void ExecuteInst_sty_zp();  // "0x84", "SKIP", "REG", "SKIP");
+	void Ins_sty_zp(uint8_t address);  // "0x84", "SKIP", "REG", "SKIP");
 	void ExecuteInst_sty_zp_x();  // "0x94", "SKIP", "REG", "OFFS");
 	void Ins_sty_abs(uint16_t address);  // "0x8C", "SKIP", "REG", "SKIP");
+
+	void Ins_extra_rra_zp_x(uint8_t zero_addr);
 
 };
 
