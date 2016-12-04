@@ -74,6 +74,24 @@ void CommandLineOptionString::Read(std::deque<std::string> &arguments)
 }
 
 
+void CommandLineOptionUInt16::Read(std::deque<std::string> &arguments)
+{
+        // Read value
+        assert(arguments.size() > 0);
+        std::string argument = arguments.front();
+        arguments.pop_front();
+
+        // Convert value
+        StringError error;
+        *variable = StringToInt(argument, error);
+
+        // Check valid value
+        if (error)
+                throw CommandLine::Error(misc::fmt("Invalid value for option "
+                                "'%s': %s", getName().c_str(),
+                                StringErrorToString(error)));
+}
+
 void CommandLineOptionInt32::Read(std::deque<std::string> &arguments)
 {
 	// Read value

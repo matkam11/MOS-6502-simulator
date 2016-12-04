@@ -6,11 +6,65 @@
 
 */
 #include "6502.h"
+
+#include "Error.h"
+#include "CommandLine.h"
+
+#include <fstream>
 #include <stdint.h>
 #include <cstring>
-#include "Error.h"
 #include <iomanip>
 #include <bitset>
+
+
+
+// Configuration options
+uint16_t Emulator::base_addr = 0xBFF0;
+bool Emulator::help = false;
+const std::string Emulator::help_message =
+        "The begging of the execution of the emulator depends on its start\n"
+        "address. This start address defaults to: 0xBFF0, and can be changed\n"
+        "with propper configuration options.\n"
+        "\n";
+
+
+void Emulator::RegisterOptions()
+{
+        // Get command line object
+        misc::CommandLine *command_line = misc::CommandLine::getInstance();
+
+        // Category
+        command_line->setCategory("Emulator System");
+
+        // Option sanity check
+        command_line->RegisterUInt16("--emu-base-address <interval>",
+                        base_addr,
+                        "This option sets the base address that is"
+                        "going to be First decoded.");
+
+        // Help message for memory system
+        command_line->RegisterBool("--emu-help",
+                        help,
+                        "Print help message with special considaration"
+                        "with regards the base address.");
+
+}
+
+void Emulator::ProcessOptions()
+{
+        SetBaseAddr(base_addr);
+
+        // Show help message
+        if (help)
+        {
+                std::cerr << help_message;
+                exit(0);
+        }
+
+        // Debug file
+        // debug.setPath(debug_file);
+}
+
 Emulator::Emulator(uint16_t pc_start) {
         pc = pc_start;
 	sr = FLAG_INTERRUPT | 0x20;
@@ -20,7 +74,7 @@ Emulator::Emulator(uint16_t pc_start) {
 }
 
 Emulator::Emulator():
-          pc(0X100)
+          pc(base_addr)
         , sr(FLAG_INTERRUPT | 0x20)
         , interrupt_waiting(0x00)
         , mem()
@@ -40,20 +94,47 @@ uint16_t Emulator::ReadTwoBytes() {
 }
 
 void Emulator::PrintStack() {
-	for (uint8_t i = 0xFF; i > sp; i--){
+
+
+        for (uint8_t i = 0xFF; i > sp; i--){
 		uint16_t stack_base = 0x0100;
-		std::cout << (int) ReadMem(stack_base + i) << " ";
+                std::cout << (int) ReadMem(stack_base + i) << " ";
 	}
 	std::cout << std::endl;
 	//std::cout << "AC X  Y  " << std::endl;
 	//	std::cout << std::setfill('0') << std::setw(2) << std::hex << "A: " << std::setfill('0') << std::setw(2) <<  ac << " X: " << (int) x << " Y: " << (int) y << " SR: " << (int) sr << std::endl;
 	//std::cout << "Status Register: SV BDIZC" << std::endl;
 	//std::cout << "Status Register: " << std::bitset<8>(sr) << std::endl;	
-
 }
 
+void Emulator::PrintMem() {
+
+    std::cout<<std::endl
+            <<"======== Mem contents from Base Address =========" <<std::endl;
+    std::cout<<"Last from last 16 bytes"<<std::endl<<"\t - ";
+
+    for (uint16_t i = base_addr; i < base_addr+256; i++)
+    {
+        if(i%16==0)
+        {
+            std::cout << std::setfill('0') << std::setw(2)
+                      << std::hex<< (int) ReadMem(i) << std::endl;
+            std::cout <<"0x" << std::setfill('0') << std::setw(2) << std::hex
+                     << (int)i<<"\t - ";
+        }
+        else
+        {
+                std::cout << std::setfill('0') << std::setw(2)
+                          << std::hex<< (int)ReadMem(i) << " ";
+        }
+    }
+    std::cout <<". . ."<< std::endl;
+    std::cout<<"===============================" <<std::endl<<std::endl;
+}
+
+
 bool Emulator::Decode(){
-	PrintStack();
+        // PrintStack();
 	uint8_t opcode = ReadMem(++pc);
 	std::cout << std::hex << "Begin Decode... Opcode " << (int) ReadMem(pc) <<" @" << pc << "         ";
 	std::cout  << "A: " <<(int) ac << " X: " << (int) x << " Y: " << (int) y << " SR: " << (int) sr << std::endl;

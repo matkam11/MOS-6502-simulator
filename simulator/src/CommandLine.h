@@ -50,7 +50,8 @@ public:
 		TypeInt32,
 		TypeInt64,
 		TypeDouble,
-		TypeEnum
+                TypeEnum,
+                TypeUInt16
 	};
 
 private:
@@ -153,6 +154,28 @@ public:
 	
 	/// Read option from command line. See CommandLineOption::Read().
 	void Read(std::deque<std::string> &arguments);
+};
+
+
+/// Command-line option taking a 16-bit Uinteger as an argument
+class CommandLineOptionUInt16 : public CommandLineOption
+{
+        // Variable affected by this option
+        uint16_t *variable;
+
+public:
+
+        /// Constructor
+        CommandLineOptionUInt16(const std::string &name,
+                        uint16_t *variable,
+                        const std::string &help) :
+                        CommandLineOption(TypeUInt16, name, 1, help),
+                        variable(variable)
+        {
+        }
+
+        /// Read option from command line. See CommandLineOption::Read().
+        void Read(std::deque<std::string> &arguments);
 };
 
 
@@ -455,6 +478,15 @@ public:
 		Register(misc::new_unique<CommandLineOptionString>(name,
 				&variable, help));
 	}
+
+        /// Same as RegisterString(), but taking an unsigned 32-bit integer as the
+        /// type of the command-line option.
+        void RegisterUInt16(const std::string &name, uint16_t &variable,
+                        const std::string &help)
+        {
+                Register(misc::new_unique<CommandLineOptionUInt16>(name,
+                                &variable, help));
+        }
 
 	/// Same as RegisterString(), but taking an unsigned 32-bit integer as the
 	/// type of the command-line option.

@@ -33,7 +33,6 @@
 
 #define VERSION "0.01v"
 
-
 //
 // Configuration options
 //
@@ -41,7 +40,8 @@
 // Binary file for OpenCL runtime
 std::string mossim_binary_path;
 
-uint16_t base_addr = 0xBFF0;
+
+bool binary_hex_dump=0;
 
 
 void WelcomeMessage(std::ostream &os)
@@ -85,18 +85,9 @@ void LoadProgram(const std::vector<std::string> &arguments,
         std::string exe = misc::getFullPath(arguments[0], current_directory);
         std::cout<<"Input file: "<< exe<<std::endl;
 
-        // Set a different base address?
-        //uint16_t base_addr = 0xBFF0;
-        //Emulator::getInstance().SetBaseAddr(base_addr);
-
         uint16_t i = Emulator::getInstance().getPC();
-        base_addr = 0xBFFF;
+
         char byte;
-
-        Emulator::getInstance().SetBaseAddr(base_addr);
-
-
-
         std::ifstream inputBinary;
         inputBinary.open(exe, std::ios::in | std::ios::binary);
         while (inputBinary.good()) {
@@ -105,6 +96,11 @@ void LoadProgram(const std::vector<std::string> &arguments,
             Emulator::getInstance().WriteMem(i,byte);
             i++;
         }
+
+        if(binary_hex_dump)
+            Emulator::getInstance().PrintMem();
+
+
         inputBinary.close();
 
 }
@@ -129,7 +125,7 @@ void RegisterOptions()
     // Set help message
     command_line->setHelp("Syntax:"
                     "\n\n"
-                    "$ mossim [<options>] [<exe>] [<args>]"
+                    "$ mossim [<options>] [<exe>]"
                     "\n\n"
                     "MosSim's command line can take a program "
                     "executable <exe> as an argument, given as a binary "
@@ -138,11 +134,12 @@ void RegisterOptions()
                     "following list of command-line options can be used "
                     "for <options>:");
 
+    // Help message for memory system
+    command_line->RegisterBool("--binary-hex-dump",
+                    binary_hex_dump,
+                    "Print the binary file in hex format"
+                    );
 
-    // Binary
-    command_line->RegisterString("--null <file>",
-                    mossim_binary_path,
-                    "Null");
 }
 
 void ProcessOptions()
@@ -206,14 +203,15 @@ int MainProgram(int argc, char **argv)
 
         // Read command line
         RegisterOptions();
+        Emulator::getInstance().RegisterOptions();
 
-        // Process command line. Return to C version of Multi2Sim if a
-        // command-line option was not recognized.
+        // Process command line
         misc::CommandLine *command_line = misc::CommandLine::getInstance();
         command_line->Process(argc, argv, false);
 
         // Process command line
         ProcessOptions();
+        Emulator::getInstance().ProcessOptions();
 
         // Load programs
         LoadPrograms();

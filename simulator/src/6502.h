@@ -20,6 +20,8 @@
 #define FLAG_CARRY 0x01
 
 #include <stdint.h>
+#include "String.h"
+
 // set if memory was modified during processing of the last instruction
 #define EMU_FLAG_DIRTY 0x01
 // set if the emulator should wait for an interrupt before continuing
@@ -41,6 +43,20 @@ private:
     Emulator(uint16_t pc_start);
 
 public:
+    //
+    // Static fields
+    //
+
+    // Base address to start execution
+    static uint16_t base_addr;
+
+    // Show emu help message
+    static bool help;
+
+    // Message to display with '--emu-help'
+    static const std::string help_message;
+
+
     uint16_t pc;
     uint8_t x, y;
     uint8_t sp;
@@ -65,9 +81,14 @@ public:
     void StackPush(uint8_t byte);
     uint8_t StackPop();
     void PrintStack();
+    void PrintMem();
     
     void WriteMem(uint16_t address, uint8_t value);
     uint8_t ReadMem(uint16_t address);
+
+    // Command line options for EMULATOR
+    void RegisterOptions();
+    void ProcessOptions();
 
 
 
