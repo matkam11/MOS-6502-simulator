@@ -95,8 +95,13 @@ public:
 	uint8_t inline * Address_abs_ptr(uint16_t address);
 	uint8_t inline * Address_abs_x_ptr(uint16_t address);
 	uint8_t inline Address_zp(uint8_t zero_addr);
+	uint8_t inline Address_zp_x(uint8_t zero_addr);
+	uint8_t inline Address_zp_y(uint8_t zero_addr);	
+	uint8_t inline Address_abs(uint16_t address);
+	uint8_t inline Address_abs_x(uint16_t address);
+	uint8_t inline Address_abs_y(uint16_t address);
 	uint8_t inline Address_ind_x(uint8_t start_address);
-
+	uint8_t inline Address_ind_y(uint8_t start_address);
 
     void Ins_jsr(uint16_t destination);
     void Ins_rts();
@@ -105,23 +110,6 @@ public:
     void Ins_ldx_imm(uint8_t value);
     void Ins_ldy_imm(uint8_t value);
     void Ins_lda_imm(uint8_t value);
-
-    void Ins_ldx_zp(uint8_t zero_addr);
-    void Ins_ldy_zp(uint8_t zero_addr);
-    void Ins_lda_zp(uint8_t zero_addr);
-
-    void Ins_ldx_zp_y(uint8_t zero_addr);
-    void Ins_ldy_zp_x(uint8_t zero_addr);
-    void Ins_lda_zp_x(uint8_t zero_addr);
-
-    void Ins_ldx_abs(uint16_t addr);
-    void Ins_ldy_abs(uint16_t addr);
-    void Ins_lda_abs(uint16_t addr);
-
-    void Ins_ldx_absy(uint16_t addr);
-    void Ins_ldy_absx(uint16_t addr);
-    void Ins_lda_absx(uint16_t addr);
-    void Ins_lda_absy(uint16_t addr);
 
     void Ins_lda_ind_x(uint8_t start_address);
 
