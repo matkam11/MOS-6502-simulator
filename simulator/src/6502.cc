@@ -20,11 +20,14 @@
 
 // Configuration options
 uint16_t Emulator::base_addr = 0xBFF0;
-uint16_t Emulator::start_addr = 0xBFF0;
+uint16_t Emulator::start_addr = 0xBFFF;
 bool Emulator::help = false;
 const std::string Emulator::help_message =
         "The begging of the execution of the emulator depends on its start\n"
-        "address. This base address defaults to: 0xBFF0, and can be changed\n"
+        "address and the address where the memory is loaded. "
+        "The base address defaults to: 0xBFF0, and can be changed\n"
+        "with propper configuration options.\n"
+        "The base address defaults to: 0xBFFF, and can be changed\n"
         "with propper configuration options.\n"
         "\n";
 
