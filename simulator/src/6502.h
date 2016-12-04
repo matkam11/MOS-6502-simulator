@@ -102,22 +102,14 @@ public:
         uint8_t inline & Address_x_ptr();
         uint8_t inline & Address_y_ptr();
         uint8_t inline & Address_imm_ptr();
-        uint8_t inline & Address_zp_ptr(uint8_t zero_addr);
-        uint8_t inline & Address_zp_x_ptr(uint8_t zero_addr);
-        uint8_t inline & Address_abs_ptr(uint16_t address);
-        uint8_t inline & Address_abs_x_ptr(uint16_t address);
-        uint8_t inline & Address_abs_y_ptr(uint16_t address);
-        uint8_t inline & Address_ind_x_ptr(uint8_t start_address);
-        uint8_t inline & Address_ind_y_ptr(uint8_t start_address);
-
-        uint8_t inline Address_zp(uint8_t zero_addr);
-        uint8_t inline Address_zp_x(uint8_t zero_addr);
-        uint8_t inline Address_zp_y(uint8_t zero_addr);
-        uint8_t inline Address_abs(uint16_t address);
-        uint8_t inline Address_abs_x(uint16_t address);
-        uint8_t inline Address_abs_y(uint16_t address);
-        uint8_t inline Address_ind_x(uint8_t start_address);
-        uint8_t inline Address_ind_y(uint8_t start_address);
+        uint8_t inline & Address_zp_ptr();
+        uint8_t inline & Address_zp_x_ptr();
+        uint8_t inline & Address_zp_y_ptr();
+        uint8_t inline & Address_abs_ptr();
+        uint8_t inline & Address_abs_x_ptr();
+        uint8_t inline & Address_abs_y_ptr();
+        uint8_t inline & Address_ind_x_ptr();
+        uint8_t inline & Address_ind_y_ptr();
 
     void Ins_jsr(uint16_t destination);
     void Ins_rts();
@@ -130,20 +122,7 @@ public:
     void Ins_lda(uint8_t & value);
 
         void Ins_adc(uint8_t &value);  // "0x69", "IME", "SKIP", "SKIP");
-        void ExecuteInst_adc_zp();  // "0x65", "SKIP", "REG", "SKIP");
-        void ExecuteInst_adc_zp_x();  // "0x75", "SKIP", "REG", "OFFS");
-        void ExecuteInst_adc_abs();  // "0x6D", "SKIP", "REG", "SKIP");
-        void ExecuteInst_adc_abs_x();  // "0x7D", "SKIP", "REG", "OFFS");
-        void ExecuteInst_adc_abs_y();  // "0x79", "SKIP", "REG", "OFFS");
-        void Ins_adc_ind_x(uint8_t start_address);  // "0x61", "SKIP", "REG", "OFFS");
-        void ExecuteInst_adc_ind_y();  // "0x71", "SKIP", "REG", "OFFS");
         void Ins_and(uint8_t &value);  // "0x29", "IME", "SKIP", "SKIP");
-        void ExecuteInst_and_zp();  // "0x25", "SKIP", "REG", "SKIP");
-        void ExecuteInst_and_zp_x();  // "0x35", "SKIP", "REG", "OFFS");
-        void ExecuteInst_and_abs();  // "0x2D", "SKIP", "REG", "SKIP");
-        void ExecuteInst_and_abs_x();  // "0x3D", "SKIP", "REG", "OFFS");
-        void ExecuteInst_and_abs_y();  // "0x39", "SKIP", "REG", "OFFS");
-        void ExecuteInst_and_ind_y();  // "0x31", "SKIP", "REG", "OFFS");
         void Ins_asl(uint8_t &src);  // "0x0A", "SKIP", "SKIP", "SKIP");
         // void Ins_asl_acc();  // "0x0A", "SKIP", "SKIP", "SKIP");
         // void Ins_asl_zp(uint8_t zero_addr);  // "0x06", "SKIP", "REG", "SKIP");
@@ -159,14 +138,9 @@ public:
         void Ins_bcs(uint8_t rel_address);  // "0xB0", "SKIP", "SKIP", "SKIP");
         void Ins_bne(uint8_t rel_address);  // "0xD0", "SKIP", "SKIP", "SKIP");
         void Ins_beq(uint8_t rel_address);  // "0xF0", "SKIP", "SKIP", "SKIP");
-        void ExecuteInst_brk();  // "0x00", "SKIP", "SKIP", "SKIP");
         void Ins_cmp(uint8_t & value);  // "0xC9", "IME", "SKIP", "SKIP");
         void Ins_cpx(uint8_t & value);  // "0xE0", "IME", "SKIP", "SKIP");
         void Ins_cpy(uint8_t & value);  // "0xC0", "IME", "SKIP", "SKIP");
-        void ExecuteInst_dec_zp();  // "0xC6", "SKIP", "REG", "SKIP");
-        void ExecuteInst_dec_zp_x();  // "0xD6", "SKIP", "REG", "OFFS");
-        void ExecuteInst_dec_abs();  // "0xCE", "SKIP", "REG", "SKIP");
-        void ExecuteInst_dec_abs_x();  // "0xDE", "SKIP", "REG", "OFFS");
         void Ins_eor(uint8_t & value);  // "0x49", "IME", "SKIP", "SKIP");
         void Ins_clc();  // "0x18", "SKIP", "SKIP", "SKIP");
         void Ins_sec();  // "0x38", "SKIP", "SKIP", "SKIP");
@@ -176,16 +150,8 @@ public:
         void Ins_cld();  // "0xD8", "SKIP", "SKIP", "SKIP");
         void Ins_sed();  // "0xD8", "SKIP", "SKIP", "SKIP");
         void Ins_inc(uint8_t &src);  // "0xE6", "SKIP", "REG", "SKIP");
-        void ExecuteInst_jsr_abs();  // "0x20", "IME", "SKIP", "SKIP");
         void Ins_lsr(uint8_t & src);  // "0x4A", "SKIP", "SKIP", "SKIP");
-        void Ins_ora_imm(uint8_t value);  // "0x09", "IME", "SKIP", "SKIP");
-        // void ExecuteInst_ora_zp();  // "0x05", "SKIP", "REG", "SKIP");
-        void ExecuteInst_ora_zp_x();  // "0x15", "SKIP", "REG", "OFFS");
-        void ExecuteInst_ora_abs();  // "0x0D", "SKIP", "REG", "SKIP");
-        void ExecuteInst_ora_abs_x();  // "0x1D", "SKIP", "REG", "OFFS");
-        void ExecuteInst_ora_abs_y();  // "0x19", "SKIP", "REG", "OFFS");
-        void Ins_ora_ind_x(uint8_t start_address);  // "0x01", "SKIP", "REG", "OFFS");
-        void ExecuteInst_ora_ind_y();  // "0x11", "SKIP", "REG", "OFFS");
+        void Ins_ora(uint8_t & value);  // "0x09", "IME", "SKIP", "SKIP");
         void Ins_tax();  // "0xAA", "SKIP", "SKIP", "SKIP");
         void Ins_txa();  // "0x8A", "SKIP", "SKIP", "SKIP");
         void Ins_dec(uint8_t &src);  // "0xCA", "SKIP", "SKIP", "SKIP");
@@ -194,29 +160,19 @@ public:
         void Ins_rol(uint8_t & src);
         void Ins_ror(uint8_t & value);  // "0x6A", "SKIP", "SKIP", "SKIP");
         void Ins_rti();  // "0x40", "SKIP", "SKIP", "SKIP");
-        void ExecuteInst_rts();  // "0x60", "SKIP", "SKIP", "SKIP");
         void Ins_sbc(uint8_t & value);  // "0xE9", "IME", "SKIP", "SKIP");
         void Ins_sta(uint8_t & address);  // "0x8D", "SKIP", "REG", "SKIP");
-        void ExecuteInst_sta_zp_x();  // "0x95", "SKIP", "REG", "OFFS");
-        void Ins_sta_abs(uint16_t address);  // "0x8D", "SKIP", "REG", "SKIP");
-        void Ins_sta_abs_x(uint16_t address);  // "0x9D", "SKIP", "REG", "OFFS");
-        void ExecuteInst_sta_abs_y();  // "0x99", "SKIP", "REG", "OFFS");
-        void Ins_sta_ind_x(uint8_t start_address);  // "0x81", "SKIP", "REG", "OFFS");
-        void Ins_sta_ind_y(uint8_t start_address);  // "0x91", "SKIP", "REG", "OFFS");
+        void Ins_stx(uint8_t & address);  // "0x8D", "SKIP", "REG", "SKIP");
+        void Ins_sty(uint8_t & address);  // "0x8D", "SKIP", "REG", "SKIP");   
         void Ins_txs_x_sp();  // "0x9A", "SKIP", "SKIP", "SKIP");
         void Ins_tsx();  // "0xBA", "SKIP", "SKIP", "SKIP");
         void Ins_pha();  // "0x48", "SKIP", "SKIP", "SKIP");
         void Ins_pla();  // "0x68", "SKIP", "SKIP", "SKIP");
         void Ins_php();  // "0x08", "SKIP", "SKIP", "SKIP");
         void Ins_plp();  // "0x28", "SKIP", "SKIP", "SKIP");
-        void Ins_stx_zp(uint8_t address);  // "0x86", "SKIP", "REG", "SKIP");
-        void ExecuteInst_stx_zp_x();  // "0x96", "SKIP", "REG", "OFFS");
-        void Ins_stx_abs(uint16_t address);  // "0x8e", "SKIP", "REG", "SKIP");
-        void Ins_sty_zp(uint8_t address);  // "0x84", "SKIP", "REG", "SKIP");
-        void ExecuteInst_sty_zp_x();  // "0x94", "SKIP", "REG", "OFFS");
-        void Ins_sty_abs(uint16_t address);  // "0x8C", "SKIP", "REG", "SKIP");
 
         void Ins_extra_rra_zp_x(uint8_t zero_addr);
+        void Ins_extra_skb();
 
 };
 
