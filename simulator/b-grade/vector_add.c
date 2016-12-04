@@ -1,18 +1,12 @@
- #include <stdlib.h>
 
-
-int * vectorAdd(int* A, int* B, size_t size)
+void vectorAdd(int A[], int B[], int C[], int size)
 {
 	int i;
-	int * C;
-	C = (int *) malloc(size*sizeof(int));
 
 	for(i = 0; i < size; ++i) 
 	{
 		C[i] = A[i] + B[i];
 	}
-
-	return C;
 }
 
 
