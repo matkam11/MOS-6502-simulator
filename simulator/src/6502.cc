@@ -227,7 +227,12 @@ bool Emulator::Decode(){
 	//PrintStack();
 	uint8_t opcode = ReadMem(++pc);
 	std::cout << std::hex << "Begin Decode... Opcode " << (int) ReadMem(pc) <<" @" << pc << "         ";
-	std::cout  << "A: " <<(int) ac << " X: " << (int) x << " Y: " << (int) y << " SR: " << (int) sr << " SP: " << (int) sp << std::endl;
+        std::cout << std::uppercase<< std::hex << "A:"
+                  << std::setfill('0') << std::setw(2) <<(int) ac << " X:"
+                  << std::setfill('0') << std::setw(2) << (int) x << " Y:"
+                  << std::setfill('0') << std::setw(2) << (int) y << " P:"
+                  << std::setfill('0') << std::setw(2) << (int) sr << " SP:"
+                  << std::setfill('0') << std::setw(2) << (int) sp << std::endl;
 
 	switch(opcode) {
 		case 0x00:
