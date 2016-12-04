@@ -164,32 +164,38 @@ uint8_t inline & Emulator::Address_imm_ptr() {
         return mem[++pc];
 }
 
-uint8_t inline & Emulator::Address_zp_ptr(uint8_t zero_addr) {
-		std::cout << (int) zero_addr << std::endl;
-    	std::cout << (int) ReadMem((zero_addr)) << std::endl;
+uint8_t inline & Emulator::Address_zp_ptr() {
+    	uint8_t zero_addr = ReadMem(++pc);
         return mem[zero_addr];
 }
 
-uint8_t inline & Emulator::Address_zp_x_ptr(uint8_t zero_addr) {
-    	std::cout << (int) ReadMem((zero_addr+x)) << std::endl;
+uint8_t inline & Emulator::Address_zp_x_ptr() {
+    	uint8_t zero_addr = ReadMem(++pc);
         return mem[zero_addr+x];
 }
 
+uint8_t inline & Emulator::Address_zp_y_ptr() {
+    	uint8_t zero_addr = ReadMem(++pc);
+        return mem[zero_addr+y];
+}
 
-uint8_t inline & Emulator::Address_abs_ptr(uint16_t address) {
-		std::cout << (int) ReadMem(address) << std::endl;
+uint8_t inline & Emulator::Address_abs_ptr() {
+		uint16_t address = ReadTwoBytes();
         return mem[address];
 }
 
-uint8_t inline &Emulator::Address_abs_x_ptr(uint16_t address) {
+uint8_t inline &Emulator::Address_abs_x_ptr() {
+		uint16_t address = ReadTwoBytes();
         return mem[(address+x)];
 }
 
-uint8_t inline &Emulator::Address_abs_y_ptr(uint16_t address) {
+uint8_t inline &Emulator::Address_abs_y_ptr() {
+		uint16_t address = ReadTwoBytes();
         return mem[(address+y)];
 }
 
-uint8_t inline &Emulator::Address_ind_x_ptr(uint8_t start_address) {
+uint8_t inline &Emulator::Address_ind_x_ptr() {
+	uint8_t start_address = ReadMem(++pc);
 	uint8_t lsb,msb;
 	uint16_t address;
     start_address += x;
@@ -200,7 +206,8 @@ uint8_t inline &Emulator::Address_ind_x_ptr(uint8_t start_address) {
 	return mem[address];
 }
 
-uint8_t inline & Emulator::Address_ind_y_ptr(uint8_t start_address) {
+uint8_t inline & Emulator::Address_ind_y_ptr() {
+	uint8_t start_address = ReadMem(++pc);
 	uint8_t lsb,msb;
 	uint16_t address;
 	lsb = ReadMem(start_address++);
@@ -209,53 +216,6 @@ uint8_t inline & Emulator::Address_ind_y_ptr(uint8_t start_address) {
     address = ((msb << 8 ) | lsb);
     address += y;
 	return mem[address];
-}
-
-uint8_t inline Emulator::Address_zp(uint8_t zero_addr) {
-	return Emulator::ReadMem(zero_addr);
-}
-
-uint8_t inline Emulator::Address_zp_x(uint8_t zero_addr) {
-	std::cout << (int) ReadMem((zero_addr+x)) << std::endl;	
-	return Emulator::ReadMem((zero_addr+x));
-}
-
-uint8_t inline Emulator::Address_zp_y(uint8_t zero_addr) {
-	return Emulator::ReadMem((zero_addr+y));
-}
-
-uint8_t inline Emulator::Address_abs(uint16_t address) {
-	return Emulator::ReadMem((address));
-}
-
-uint8_t inline Emulator::Address_abs_x(uint16_t address) {
-	return Emulator::ReadMem((address+x));
-}
-
-uint8_t inline Emulator::Address_abs_y(uint16_t address) {
-	return Emulator::ReadMem((address+y));
-}
-
-uint8_t inline Emulator::Address_ind_x(uint8_t start_address) {
-	uint8_t lsb,msb;
-	uint16_t address;
-    start_address += x;
-	lsb = ReadMem(start_address++);
-	msb = ReadMem(start_address);
-
-    address = ((msb << 8 ) | lsb);
-	return ReadMem(address);
-}
-
-uint8_t inline Emulator::Address_ind_y(uint8_t start_address) {
-	uint8_t lsb,msb;
-	uint16_t address;
-	lsb = ReadMem(start_address++);
-	msb = ReadMem(start_address);
-
-    address = ((msb << 8 ) | lsb);
-    address += y;
-	return ReadMem(address);
 }
 
 bool Emulator::Decode(){
@@ -268,7 +228,6 @@ bool Emulator::Decode(){
                   << std::setfill('0') << std::setw(2) << (int) y << " P:"
                   << std::setfill('0') << std::setw(2) << (int) sr << " SP:"
                   << std::setfill('0') << std::setw(2) << (int) sp << std::endl;
-  	MemoryWatch(0x02FF);
 	switch(opcode) {
 		case 0x00:
 			return false;
@@ -276,72 +235,81 @@ bool Emulator::Decode(){
 		case 0x01:
 			//std::cout << "Or Acc Indirect X" << std::endl
 			//Ins_ora_ind_x(ReadMem(++pc)); // Tested
-			Ins_ora_imm(Address_ind_x(ReadMem(++pc)));
+			Ins_ora(Address_ind_x_ptr());
+			break;
+		case 0x04:
+			Ins_extra_skb();
 			break;
 		case 0x05:
 			// ORA zp addressing mode
-			Ins_ora_imm(Address_zp(ReadMem(++pc)));
+			Ins_ora(Address_zp_ptr());
 			break;
 		case 0x06:
 			// Ins_asl_zp(ReadMem(++pc)); // Tested
-			Ins_asl(Address_zp_ptr(ReadMem(++pc)));
+			Ins_asl(Address_zp_ptr());
 			break;
 		case 0x08:
 			Ins_php(); // Tested
 			break;
 		case 0x09:
-			Ins_ora_imm(ReadMem(++pc));
+			Ins_ora(Address_imm_ptr());
 			break;
 		case 0x0A:
 			//Ins_asl_acc(); // Tested
 			Ins_asl(Address_acc_ptr());
 			break;
 		case 0x0D:
-			Ins_ora_imm(Address_abs(ReadTwoBytes()));
+			Ins_ora(Address_abs_ptr());
 			break;
 		case 0x0E:
 			//Ins_asl_abs(ReadTwoBytes()); // Tested
-			Ins_asl(Address_abs_ptr(ReadTwoBytes()));
+			Ins_asl(Address_abs_ptr());
 			break;
 		case 0x10:
 			//std::cout << "Branch Positive" << std::endl;
 			Ins_bpl(ReadMem(++pc)); // Tested
 			break;
 		case 0x11:
-			Ins_ora_imm(Address_ind_y(ReadMem(++pc)));
+			Ins_ora(Address_ind_y_ptr());
+			break;
+		case 0x14:
+			Ins_extra_skb();
 			break;
 		case 0x15:
-			Ins_ora_imm(Address_zp_x(ReadMem(++pc)));
+			Ins_ora(Address_zp_x_ptr());
+			break;
+		case 0x16:
+			Ins_asl(Address_zp_x_ptr());
 			break;
 		case 0x18:
 			Ins_clc();
 			break;
 		case 0x19:
-			Ins_ora_imm(Address_abs_y(ReadTwoBytes()));
+			Ins_ora(Address_abs_y_ptr());
 			break;
 		case 0x1D:
-			Ins_ora_imm(Address_abs_x(ReadTwoBytes()));
+			Ins_ora(Address_abs_x_ptr());
 			break;
 		case 0x1E:
 			//Ins_asl_abs_x(ReadTwoBytes()); // Tested
-			Ins_asl(Address_abs_x_ptr(ReadTwoBytes()));
+			Ins_asl(Address_abs_x_ptr());
 			break;
 		case 0x20:
 			//std::cout << "JSR" << std::endl;
 			Ins_jsr(ReadTwoBytes()); // Tested
 			break;
 		case 0x21:
-			Ins_and(Address_ind_x_ptr(ReadMem(++pc)));
+			Ins_and(Address_ind_x_ptr());
 			break;
 		case 0x24:
         	std::cout << (int) ReadMem((pc+1)) << std::endl;
-			Ins_bit(Address_zp_ptr(ReadMem(++pc)));
+			Ins_bit(Address_zp_ptr());
 			break;
 		case 0x25:
-			Ins_and(Address_zp_ptr(ReadMem(++pc)));
+			Ins_and(Address_zp_ptr());
 			break;
 		case 0x26:
-			Ins_rol(Address_zp_ptr(ReadMem(++pc)));
+			Ins_rol(Address_zp_ptr());
 			break;
 		case 0x28:
 			Ins_plp();
@@ -353,49 +321,55 @@ bool Emulator::Decode(){
 			Ins_rol(Address_acc_ptr());
 			break;
 		case 0x2C:
-			Ins_bit(Address_abs_ptr(ReadTwoBytes()));
+			Ins_bit(Address_abs_ptr());
 			break;	
 		case 0x2D:
-			Ins_and(Address_abs_ptr(ReadTwoBytes()));
+			Ins_and(Address_abs_ptr());
 			break;
 		case 0x2E:
-			Ins_rol(Address_abs_ptr(ReadTwoBytes()));
+			Ins_rol(Address_abs_ptr());
 			break;
 		case 0x30:
 			Ins_bmi(ReadMem(++pc));
 			break;
 		case 0x31:
-			Ins_and(Address_ind_y_ptr(ReadMem(++pc)));
+			Ins_and(Address_ind_y_ptr());
+			break;
+		case 0x34:
+			Ins_extra_skb();
 			break;
 		case 0x35:
-			Ins_and(Address_zp_x_ptr(ReadMem(++pc)));
+			Ins_and(Address_zp_x_ptr());
 			break;
 		case 0x36:
-			Ins_rol(Address_abs_x_ptr(ReadTwoBytes()));
+			Ins_rol(Address_zp_x_ptr());
 			break;
 		case 0x38:
 			Ins_sec();
 			break;
 		case 0x3D:
-			Ins_and(Address_abs_x_ptr(ReadTwoBytes()));
+			Ins_and(Address_abs_x_ptr());
 			break;
 		case 0x3E: 
-			Ins_rol(Address_abs_x_ptr(ReadMem(++pc)));
+			Ins_rol(Address_abs_x_ptr());
 			break;
 		case 0x39:
-			Ins_and(Address_abs_y_ptr(ReadTwoBytes()));
+			Ins_and(Address_abs_y_ptr());
 			break;
 		case 0x40:
 			Ins_rti();
 			break;
 		case 0x41:
-			Ins_eor(Address_ind_x_ptr(ReadMem(++pc)));
+			Ins_eor(Address_ind_x_ptr());
+			break;
+		case 0x44:
+			Ins_extra_skb();
 			break;
 		case 0x45:
-			Ins_eor(Address_zp_ptr(ReadMem(++pc)));
+			Ins_eor(Address_zp_ptr());
 			break;
 		case 0x46:
-			Ins_lsr(Address_zp_ptr(ReadMem(++pc)));
+			Ins_lsr(Address_zp_ptr());
 			break;
 		case 0x48:
 			Ins_pha();
@@ -411,44 +385,53 @@ bool Emulator::Decode(){
 			Ins_jmp_abs(ReadTwoBytes()); // Tested
 			break;
 		case 0x4D:
-			Ins_eor(Address_abs_ptr(ReadTwoBytes()));
+			Ins_eor(Address_abs_ptr());
 			break;
 		case 0x4E:
-			Ins_lsr(Address_abs_ptr(ReadTwoBytes()));
+			Ins_lsr(Address_abs_ptr());
 			break;
 		case 0x50:
 			Ins_bvc(ReadMem(++pc));
 			break;
 		case 0x51:
-			Ins_eor(Address_ind_y_ptr(ReadMem(++pc)));
+			Ins_eor(Address_ind_y_ptr());
+			break;
+		case 0x54:
+			Ins_extra_skb();
 			break;
 		case 0x55:
-			Ins_eor(Address_zp_x_ptr(ReadMem(++pc)));
+			Ins_eor(Address_zp_x_ptr());
 			break;
 		case 0x56:
-			Ins_lsr(Address_zp_x_ptr(ReadMem(++pc)));
+			Ins_lsr(Address_zp_x_ptr());
 			break;
 		case 0x58:
 			Ins_cli();
 			break;
+		case 0x59:
+			Ins_eor(Address_abs_y_ptr());
+			break;
 		case 0x5D:
-			Ins_eor(Address_abs_x_ptr(ReadTwoBytes()));
+			Ins_eor(Address_abs_x_ptr());
 			break;
 		case 0x5E:
-			Ins_lsr(Address_abs_x_ptr(ReadTwoBytes()));
+			Ins_lsr(Address_abs_x_ptr());
 			break;
 		case 0x60:
 			//std::cout << "Return to Subroutine" << std::endl;
 			Ins_rts(); // Tested?
 			break;
 		case 0x61:
-            Ins_adc(Address_ind_x_ptr(ReadMem(++pc)));
+            Ins_adc(Address_ind_x_ptr());
+			break;
+		case 0x64:
+			Ins_extra_skb();
 			break;
 		case 0x65:
-            Ins_adc(Address_zp_ptr(ReadMem(++pc)));
+            Ins_adc(Address_zp_ptr());
 			break;
 		case 0x66:
-			Ins_ror(Address_zp_ptr(ReadMem(++pc)));
+			Ins_ror(Address_zp_ptr());
 			break;
 		case 0x68:
 			Ins_pla();
@@ -463,22 +446,25 @@ bool Emulator::Decode(){
 			Ins_jmp_ind(ReadTwoBytes());;
 			break;
 		case 0x6E:
-			Ins_ror(Address_abs_ptr(ReadTwoBytes()));
+			Ins_ror(Address_abs_ptr());
 			break;
 		case 0x6D:
-			Ins_adc(Address_abs_ptr(ReadTwoBytes()));
+			Ins_adc(Address_abs_ptr());
 			break;
 		case 0x70:
 			Ins_bvs(ReadMem(++pc));
 			break;
 		case 0x71:
-			Ins_adc(Address_ind_y_ptr(ReadMem(++pc)));
+			Ins_adc(Address_ind_y_ptr());
+			break;
+		case 0x74:
+			Ins_extra_skb();
 			break;
 		case 0x75:
-			Ins_adc(Address_zp_x_ptr(ReadMem(++pc)));
+			Ins_adc(Address_zp_x_ptr());
 			break;
 		case 0x76:
-			Ins_ror(Address_zp_x_ptr(ReadMem(pc)));
+			Ins_ror(Address_zp_x_ptr());
 			break;
 		case 0x77:
 			Ins_extra_rra_zp_x(ReadMem(++pc));
@@ -487,77 +473,92 @@ bool Emulator::Decode(){
 			Ins_sei();
 			break;
 		case 0x79:
-			Ins_adc(Address_abs_y_ptr(ReadTwoBytes()));
+			Ins_adc(Address_abs_y_ptr());
 			break;
 		case 0x7D:
-			Ins_adc(Address_abs_x_ptr(ReadTwoBytes()));
+			Ins_adc(Address_abs_x_ptr());
 			break;
 		case 0x7E:
-			Ins_ror(Address_abs_x_ptr(ReadTwoBytes()));
+			Ins_ror(Address_abs_x_ptr());
+			break;
+		case 0x80:
+			Ins_extra_skb();
 			break;
 		case 0x81:
-            Ins_sta(Address_ind_x_ptr(ReadMem(++pc)));
+            Ins_sta(Address_ind_x_ptr());
+			break;
+		case 0x82:
+			Ins_extra_skb();
 			break;
 		case 0x84:
-			Ins_sty_zp(ReadMem(++pc));
+			Ins_sty(Address_zp_ptr());
 		 	break;
 		case 0x85:
-	    	std::cout << (int) ReadMem((pc+1)) << std::endl;
-            Ins_sta(Address_zp_ptr(ReadMem(++pc)));
+            Ins_sta(Address_zp_ptr());
 			break;
 		case 0x86:
-			//std::
-			Ins_stx_zp(ReadMem(++pc));
+			Ins_stx(Address_zp_ptr());
 			break;
 		case 0x88:
-			//std::cout << "Decrement Y" << std::endl;
 			Ins_dec(Address_y_ptr());
 			break;
 		case 0x8A:
 			Ins_txa();
 			break;
 		case 0x8C:
-			Ins_sty_abs(ReadTwoBytes());
+			Ins_sty(Address_abs_ptr());
 			break;
 		case 0x8D:
-			Ins_sta(Address_abs_ptr(ReadTwoBytes()));
+			Ins_sta(Address_abs_ptr());
 			break;
 		case 0x8E:
-			Ins_stx_abs(ReadTwoBytes());
+			Ins_stx(Address_abs_ptr());
 			break;
 		case 0x90:
 			Ins_bcc(ReadMem(++pc));
 			break;
 		case 0x91:
-            Ins_sta(Address_ind_y_ptr(ReadMem(++pc)));
+            Ins_sta(Address_ind_y_ptr());
+			break;
+		case 0x94:
+			Ins_sty(Address_zp_x_ptr());
+			break;
+		case 0x95:
+			Ins_sta(Address_zp_x_ptr());
+			break;
+		case 0x96:
+			Ins_stx(Address_zp_y_ptr());
 			break;
 		case 0x98:
 			Ins_tya();
+			break;
+		case 0x99:
+            Ins_sta(Address_abs_y_ptr());
 			break;
 		case 0x9A:
 			Ins_txs_x_sp(); // Tested
 			break;
 		case 0x9D:
-			Ins_sta(Address_abs_x_ptr(ReadTwoBytes()));
+			Ins_sta(Address_abs_x_ptr());
 			break;
 		case 0xA0:
 			Ins_ldy(Address_imm_ptr()); // Tested
 			break;
 		case 0xA1:
-			Ins_lda(Address_ind_x_ptr(ReadMem(++pc)));
+			Ins_lda(Address_ind_x_ptr());
 			break;
 		case 0xA2:
 			std::cout << (int) ReadMem(pc+1) << std::endl;
 			Ins_ldx(Address_imm_ptr()); // Tested
 			break;
 		case 0xA4:
-			Ins_ldy(Address_zp_ptr(ReadMem(++pc)));
+			Ins_ldy(Address_zp_ptr());
 			break;
 		case 0xA5:
-			Ins_lda(Address_zp_ptr(ReadMem(++pc))); // Tested
+			Ins_lda(Address_zp_ptr()); // Tested
 			break;
 		case 0xA6:
-			Ins_ldx(Address_zp_ptr(ReadMem(++pc))); // Tested
+			Ins_ldx(Address_zp_ptr()); // Tested
 			break;
 		case 0xA8:
 			Ins_tay(); // Tested
@@ -570,49 +571,64 @@ bool Emulator::Decode(){
 			break;
 		case 0xAC:
 			//std::cout << "Ldy abs " << (int) ReadMem((pc+2)) << (int) ReadMem((pc+1)) << std::endl;
-			Ins_ldy(Address_abs_ptr(ReadTwoBytes())); // Tested
+			Ins_ldy(Address_abs_ptr()); // Tested
 			break;
 		case 0xAD:
-			Ins_lda(Address_abs_ptr(ReadTwoBytes()));
+			Ins_lda(Address_abs_ptr());
 			break;
 		case 0xAE:
-			Ins_ldx(Address_abs_ptr(ReadTwoBytes()));
+			Ins_ldx(Address_abs_ptr());
 			break;
 		case 0xB0:
 			Ins_bcs(ReadMem(++pc));
 			break;
 		case 0xB1:
-			Ins_lda(Address_ind_y_ptr(ReadMem(++pc)));
+			Ins_lda(Address_ind_y_ptr());
+			break;
+		case 0xB4:
+			Ins_ldy(Address_zp_x_ptr());
 			break;
 		case 0xB5:
-			Ins_lda(Address_zp_x_ptr(ReadMem(++pc))); // Tested
+			Ins_lda(Address_zp_x_ptr()); // Tested
+			break;
+		case 0xB6:
+			Ins_ldx(Address_zp_y_ptr());
 			break;
 		case 0xB8:
 			Ins_clv();
 			break;
 		case 0xB9:
-			Ins_lda(Address_abs_y_ptr(ReadTwoBytes())); // Tested
+			Ins_lda(Address_abs_y_ptr()); // Tested
 			break;
 		case 0xBA:
 			Ins_tsx();
 			break;
+		case 0xBC:
+			Ins_ldy(Address_abs_x_ptr());
+			break;
 		case 0xBD:
-			Ins_lda(Address_abs_x_ptr(ReadTwoBytes())); // Tested
+			Ins_lda(Address_abs_x_ptr()); // Tested
+			break;
+		case 0xBE:
+			Ins_ldx(Address_abs_x_ptr());
 			break;
 		case 0xC0:
 			Ins_cpy(Address_imm_ptr()); // Tested
 			break;
 		case 0xC1:
-            Ins_cmp(Address_ind_y_ptr(ReadMem(++pc)));
+            Ins_cmp(Address_ind_y_ptr());
+			break;
+		case 0xC2:
+			Ins_extra_skb();
 			break;
 		case 0xC4:
-			Ins_cpy(Address_zp_ptr(ReadMem(++pc)));
+			Ins_cpy(Address_zp_ptr());
 			break;
 		case 0xC5:
-			Ins_cmp(Address_zp_ptr(ReadMem(++pc)));
+			Ins_cmp(Address_zp_ptr());
 			break;
 		case 0xC6:
-			Ins_dec(Address_zp_ptr(ReadMem(++pc)));
+			Ins_dec(Address_zp_ptr());
 			break;
 		case 0xC8:
 			std::cout << "Inc Y" << std::endl;
@@ -626,55 +642,61 @@ bool Emulator::Decode(){
 			Ins_dec(Address_x_ptr()); // Tested
 			break;
 		case 0xCC:
-			Ins_cpy(Address_abs_ptr(ReadTwoBytes()));
+			Ins_cpy(Address_abs_ptr());
 			break;
 		case 0xCD:
-			Ins_cmp(Address_abs_ptr(ReadTwoBytes()));
+			Ins_cmp(Address_abs_ptr());
 			break;
 		case 0xCE:
-			Ins_dec(Address_abs_ptr(ReadTwoBytes()));
+			Ins_dec(Address_abs_ptr());
 			break;
 		case 0xD0:
 			//std::cout << "Branch If not Equal (!Zero Flag)" << std::endl;
 			Ins_bne(ReadMem(++pc)); // Tested
 			break;
 		case 0xD1:
-			Ins_cmp(Address_ind_y_ptr(ReadMem(++pc)));
+			Ins_cmp(Address_ind_y_ptr());
+			break;
+		case 0xD4:
+			Ins_extra_skb();
 			break;
 		case 0xD5:
-			Ins_cmp(Address_zp_ptr(ReadMem(++pc)));
+			Ins_cmp(Address_zp_ptr());
 			break;
 		case 0xD6:
-			Ins_dec(Address_zp_x_ptr(ReadMem(++pc)));
+			Ins_dec(Address_zp_x_ptr());
 			break;
 		case 0xD8:
 			Ins_cld(); // Tested
 			//std::cout << "Clear Decimal Flag" << std::endl;
 			break;
 		case 0xD9:
-			Ins_cmp(Address_abs_y_ptr(ReadTwoBytes()));
+			Ins_cmp(Address_abs_y_ptr());
 			break;
 		case 0xDD:
-			Ins_cmp(Address_abs_x_ptr(ReadTwoBytes()));
+			Ins_cmp(Address_abs_x_ptr());
 			break;
 		case 0xDE:
-			Ins_dec(Address_abs_x_ptr(ReadTwoBytes()));
+			Ins_dec(Address_abs_x_ptr());
 			break;
 		case 0xE0:
 			Ins_cpx(Address_imm_ptr());
 			break;
 		case 0xE1:
-			Ins_sbc(Address_ind_x_ptr(ReadMem(++pc)));
+			Ins_sbc(Address_ind_x_ptr());
+			break;
+		case 0xE2:
+			Ins_extra_skb();
 			break;
 		case 0xE4:
-			Ins_cpx(Address_zp_ptr(ReadMem(++pc)));
+			Ins_cpx(Address_zp_ptr());
 			break;
 		case 0xE5:
-			Ins_sbc(Address_zp_ptr(ReadMem(++pc)));
+			Ins_sbc(Address_zp_ptr());
 			break;
         case 0xE6:
         	std::cout << (int) ReadMem((pc+1)) << std::endl;
-			Ins_inc(Address_zp_ptr(ReadMem(++pc)));
+			Ins_inc(Address_zp_ptr());
         	std::cout << (int) ReadMem((pc)) << std::endl;
 			break;
 		case 0xE8:
@@ -688,38 +710,41 @@ bool Emulator::Decode(){
 			//std::cout << "NOP" << std::endl;
 			break;
 		case 0xEC:
-			Ins_cpx(Address_abs_ptr(ReadTwoBytes()));
+			Ins_cpx(Address_abs_ptr());
 			break;
 		case 0xED:
-			Ins_sbc(Address_abs_ptr(ReadTwoBytes()));
+			Ins_sbc(Address_abs_ptr());
 			break;
 		case 0xEE:
-			Ins_inc(Address_abs_ptr(ReadTwoBytes()));
+			Ins_inc(Address_abs_ptr());
 			break;
 		case 0xF0:
 			//std::cout << "Branh if Equal (zero Flag)" << std::endl;
 			Ins_beq(ReadMem(++pc)); // Tested
 			break;
 		case 0xF1:
-			Ins_sbc(Address_ind_y_ptr(ReadMem(++pc)));
+			Ins_sbc(Address_ind_y_ptr());
+			break;
+		case 0xF4:
+			Ins_extra_skb();
 			break;
 		case 0xF5:
-			Ins_sbc(Address_zp_x_ptr(ReadMem(++pc)));
+			Ins_sbc(Address_zp_x_ptr());
 			break;
 		case 0xF6:
-			Ins_inc(Address_zp_x_ptr(ReadMem(++pc)));
+			Ins_inc(Address_zp_x_ptr());
 			break;
 		case 0xF8:
 			Ins_sed();
 			break;
 		case 0xF9:
-			Ins_sbc(Address_abs_y_ptr(ReadTwoBytes()));
+			Ins_sbc(Address_abs_y_ptr());
 			break;
 		case 0xFD:
-			Ins_sbc(Address_abs_x_ptr(ReadTwoBytes()));
+			Ins_sbc(Address_abs_x_ptr());
 			break;
 		case 0xFE:
-			Ins_inc(Address_abs_x_ptr(ReadTwoBytes()));
+			Ins_inc(Address_abs_x_ptr());
 			break;
 		default:
 			std::cout << "Error: Opcode '" << std::setfill('0')<< std::setw(2) << (int) opcode << "' Not Implemented" << std::endl;
@@ -834,7 +859,16 @@ void Emulator::Ins_jmp_abs(uint16_t destination) {
 
 void Emulator::Ins_jmp_ind(uint16_t address) {
 	uint8_t lsb,msb;
-	lsb = ReadMem(address++);
+	uint16_t address_lsb;
+	uint16_t address_msb;
+	lsb = ReadMem(address);
+	std::cout << (int)address << std::endl;
+	address_msb = address & 0xFF00;
+	address_lsb = address & 0x00FF;
+	std::cout << (int)address_msb << " " << (int)address_lsb << std::endl;
+
+	address = address_msb | ((address_lsb +1)&0xFF);
+	std::cout << (int)address << std::endl;
 	msb = ReadMem(address);
 
     address = ((msb << 8 ) | lsb);
@@ -1063,12 +1097,6 @@ void Emulator::Ins_beq(uint8_t rel_address)  //F0", "SKIP", "SKIP", "SKIP")
 	}
 }
 
-void Emulator::ExecuteInst_brk()  //00", "SKIP", "SKIP", "SKIP")
-{
-	throw misc::Panic("Unimplemented instruction");
-}
-
-
 void Emulator::Ins_cmp(uint8_t & value)  //C9", "IME", "SKIP", "SKIP")
 {
 	uint16_t result = ac - value;
@@ -1091,30 +1119,6 @@ void Emulator::Ins_cpy(uint8_t & value)  //C0", "IME", "SKIP", "SKIP")
 	SetFlag((result & 0x80) , FLAG_NEGATIVE);
 	SetFlag((!result) , FLAG_ZERO);
 }
-
-void Emulator::ExecuteInst_dec_zp()  //C6", "SKIP", "REG", "SKIP")
-{
-	throw misc::Panic("Unimplemented instruction");
-}
-
-
-void Emulator::ExecuteInst_dec_zp_x()  //D6", "SKIP", "REG", "OFFS")
-{
-	throw misc::Panic("Unimplemented instruction");
-}
-
-
-void Emulator::ExecuteInst_dec_abs()  //CE", "SKIP", "REG", "SKIP")
-{
-	throw misc::Panic("Unimplemented instruction");
-}
-
-
-void Emulator::ExecuteInst_dec_abs_x()  //DE", "SKIP", "REG", "OFFS")
-{
-	throw misc::Panic("Unimplemented instruction");
-}
-
 
 void Emulator::Ins_eor(uint8_t &value)  //49", "IME", "SKIP", "SKIP")
 {
@@ -1175,15 +1179,7 @@ void Emulator::Ins_inc(uint8_t &src)  //E6", "SKIP", "REG", "SKIP")
     src = value;
 }
 
-void Emulator::ExecuteInst_jsr_abs()  //20", "IME", "SKIP", "SKIP")
-{
-	throw misc::Panic("Unimplemented instruction");
-}
-
-
-
-
-void Emulator::Ins_ora_imm(uint8_t value)  //09", "IME", "SKIP", "SKIP")
+void Emulator::Ins_ora(uint8_t & value)  //09", "IME", "SKIP", "SKIP")
 {
 	ac |= value;
 	SetFlag((ac & 0x80), FLAG_NEGATIVE);
@@ -1299,6 +1295,21 @@ void Emulator::Ins_sta(uint8_t & value)  //8D", "SKIP", "REG", "SKIP")
     value = ac;
 }
 
+void Emulator::Ins_stx(uint8_t & value)  //8D", "SKIP", "REG", "SKIP")
+{
+	//std::cout << "Storing AC: " << ac << " In address "	<< address << std::endl;
+    //WriteMem(address, ac);
+    value = x;
+}
+
+
+void Emulator::Ins_sty(uint8_t & value)  //8D", "SKIP", "REG", "SKIP")
+{
+	//std::cout << "Storing AC: " << ac << " In address "	<< address << std::endl;
+    //WriteMem(address, ac);
+    value = y;
+}
+
 
 void Emulator::Ins_txs_x_sp()  //9A", "SKIP", "SKIP", "SKIP")
 {
@@ -1346,42 +1357,6 @@ void Emulator::Ins_plp()  //28", "SKIP", "SKIP", "SKIP")
 	SetFlag(1,0x20);
 }
 
-
-void Emulator::Ins_stx_zp(uint8_t address)  //86", "SKIP", "REG", "SKIP")
-{
-	WriteMem(address, x);
-}
-
-
-void Emulator::ExecuteInst_stx_zp_x()  //96", "SKIP", "REG", "OFFS")
-{
-	throw misc::Panic("Unimplemented instruction");
-}
-
-
-void Emulator::Ins_stx_abs(uint16_t address)  //8e", "SKIP", "REG", "SKIP")
-{
-	WriteMem(address, x);
-}
-
-
-void Emulator::Ins_sty_zp(uint8_t address)  //84", "SKIP", "REG", "SKIP")
-{
-	WriteMem(address, y);
-}
-
-
-void Emulator::ExecuteInst_sty_zp_x()  //94", "SKIP", "REG", "OFFS")
-{
-	throw misc::Panic("Unimplemented instruction");
-}
-
-
-void Emulator::Ins_sty_abs(uint16_t address)  //8C", "SKIP", "REG", "SKIP")
-{
-	WriteMem(address, y);
-}
-
 void Emulator::Ins_extra_rra_zp_x(uint8_t zero_addr)
 {
 	uint16_t value = ReadMem((zero_addr+x));
@@ -1394,138 +1369,12 @@ void Emulator::Ins_extra_rra_zp_x(uint8_t zero_addr)
 	ac = result & 0xFF;
 	SetFlag((!ac), FLAG_ZERO);
 	SetFlag((ac&0x80), FLAG_NEGATIVE);
-	//FZ = (A == 0);
-	//FN = (A >> 7) & 1;
-	WriteMem((zero_addr+x), value); //MemSet(CalcAddr, TmpData);
-
-
-	// uint temp = value + ac + TestFlag(FLAG_CARRY);
-	// SetFlag(!(temp & 0xFF),FLAG_ZERO);
-	// if (TestFlag(FLAG_DECIMAL)) {
-	// 	// if (((ac & 0xF) + (value & 0xF) + (TestFlag(FLAG_CARRY) & 0x1)) > 9) {
-	// 	// 	temp += 6;
-	// 	// }
-	// 	SetFlag((temp&0x80), FLAG_NEGATIVE);
-	// 	SetFlag(!((ac ^ value) & 0x80) && ((ac ^ temp) & 0x80), FLAG_OVERFLOW);
-	// 	// if (temp > 0x99) {
-	// 	// 	temp += 96;
-	// 	// }
-	// 	SetFlag((temp > 0x99), FLAG_CARRY);
-	// } else {
-	// 	SetFlag((temp&0x80), FLAG_NEGATIVE);
-	// 	SetFlag(!((ac ^ value) & 0x80) && ((ac ^ temp) & 0x80), FLAG_OVERFLOW);
-	// 	SetFlag((temp > 0xFF), FLAG_CARRY);
-	// }
-	// ac = temp & 0xFF;	
+	WriteMem((zero_addr+x), value);
 }
 
-// void Emulator::ExecuteInst_lda_imm()  //A9", "IME", "SKIP", "SKIP")
-// {
-// 	throw misc::Panic("Unimplemented instruction");
-// }
-
-
-// void Emulator::ExecuteInst_lda_zp()  //A5", "SKIP", "REG", "SKIP")
-// {
-// 	throw misc::Panic("Unimplemented instruction");
-// }
-
-
-// void Emulator::ExecuteInst_lda_zp_x()  //B5", "SKIP", "REG", "OFFS")
-// {
-// 	throw misc::Panic("Unimplemented instruction");
-// }
-
-
-// void Emulator::ExecuteInst_lda_abs()  //AD", "SKIP", "REG", "SKIP")
-// {
-// 	throw misc::Panic("Unimplemented instruction");
-// }
-
-
-// void Emulator::ExecuteInst_lda_abs_x()  //BD", "SKIP", "REG", "OFFS")
-// {
-// 	throw misc::Panic("Unimplemented instruction");
-// }
-
-
-// void Emulator::ExecuteInst_lda_abs_y()  //B9", "SKIP", "REG", "OFFS")
-// {
-// 	throw misc::Panic("Unimplemented instruction");
-// }
-
-
-// void Emulator::ExecuteInst_lda_ind_x()  //A1", "SKIP", "REG", "OFFS")
-// {
-// 	throw misc::Panic("Unimplemented instruction");
-// }
-
-
-// void Emulator::ExecuteInst_lda_ind_y()  //B1", "SKIP", "REG", "OFFS")
-// {
-// 	throw misc::Panic("Unimplemented instruction");
-// }
-
-
-// void Emulator::ExecuteInst_ldx_imm()  //A2", "IME", "SKIP", "SKIP")
-// {
-// 	throw misc::Panic("Unimplemented instruction");
-// }
-
-
-// void Emulator::ExecuteInst_ldx_zp()  //A6", "SKIP", "REG", "SKIP")
-// {
-// 	throw misc::Panic("Unimplemented instruction");
-// }
-
-
-// void Emulator::ExecuteInst_ldx_zp_x()  //B6", "SKIP", "REG", "OFFS")
-// {
-// 	throw misc::Panic("Unimplemented instruction");
-// }
-
-
-// void Emulator::ExecuteInst_ldx_abs()  //AE", "SKIP", "REG", "SKIP")
-// {
-// 	throw misc::Panic("Unimplemented instruction");
-// }
-
-
-// void Emulator::ExecuteInst_ldx_abs_x()  //BE", "SKIP", "REG", "OFFS")
-// {
-// 	throw misc::Panic("Unimplemented instruction");
-// }
-
-
-// void Emulator::ExecuteInst_ldy_imm()  //A0", "IME", "SKIP", "SKIP")
-// {
-// 	throw misc::Panic("Unimplemented instruction");
-// }
-
-
-// void Emulator::ExecuteInst_ldy_zp()  //A4", "SKIP", "REG", "SKIP")
-// {
-// 	throw misc::Panic("Unimplemented instruction");
-// }
-
-
-// void Emulator::ExecuteInst_ldy_zp_x()  //B4", "SKIP", "REG", "OFFS")
-// {
-// 	throw misc::Panic("Unimplemented instruction");
-// }
-
-
-// void Emulator::ExecuteInst_ldy_abs()  //AC", "SKIP", "REG", "SKIP")
-// {
-// 	throw misc::Panic("Unimplemented instruction");
-// }
-
-
-// void Emulator::ExecuteInst_ldy_abs_x()  //BC", "SKIP", "REG", "OFFS")
-// {
-// 	throw misc::Panic("Unimplemented instruction");
-// }
-
+void Emulator::Ins_extra_skb() {
+	pc++;
+}
 
 void Emulator::Ins_lsr(uint8_t & src)  //4A", "SKIP", "SKIP", "SKIP")
 {
