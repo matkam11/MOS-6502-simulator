@@ -76,7 +76,7 @@ void Emulator::ProcessOptions()
 }
 
 Emulator::Emulator(uint16_t pc_start) {
-        pc = pc_start;
+    pc = pc_start;
 	sr = FLAG_INTERRUPT | 0x20;
 	sp = 0xFD;
 	interrupt_waiting = 0x00;
@@ -85,6 +85,7 @@ Emulator::Emulator(uint16_t pc_start) {
 
 Emulator::Emulator():
           pc(start_addr)
+        , sp(0xFD)
         , sr(FLAG_INTERRUPT | 0x20)
         , interrupt_waiting(0x00)
         , mem()
@@ -365,7 +366,7 @@ bool Emulator::Decode(){
 			Ins_pla();
 			break;
 		case 0x69:
-                        Ins_adc(ReadMem(++pc));
+            Ins_adc(ReadMem(++pc));
 			break;
 		case 0x6A:
 			Ins_ror_acc();
@@ -380,13 +381,13 @@ bool Emulator::Decode(){
 			Ins_sei();
 			break;
 		case 0x81:
-                        Ins_sta(Address_ind_x(ReadMem(++pc)));
+            Ins_sta(Address_ind_x(ReadMem(++pc)));
 			break;
 		case 0x84:
 			Ins_sty_zp(ReadMem(++pc));
 		 	break;
 		case 0x85:
-                        Ins_sta(Address_zp_ptr(ReadMem(++pc)));
+            Ins_sta(Address_zp_ptr(ReadMem(++pc)));
 			break;
 		case 0x86:
 			Ins_stx_zp(ReadMem(++pc));
