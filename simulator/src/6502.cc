@@ -143,20 +143,20 @@ void Emulator::PrintMem() {
 }
 
 
-uint8_t inline * Emulator::Address_acc_ptr() {
-	return &ac;
+uint8_t inline & Emulator::Address_acc_ptr() {
+        return ac;
 }
 
-uint8_t inline * Emulator::Address_zp_ptr(uint8_t zero_addr) {
-	return &mem[zero_addr];
+uint8_t inline & Emulator::Address_zp_ptr(uint8_t zero_addr) {
+        return mem[zero_addr];
 }
 
-uint8_t inline * Emulator::Address_abs_ptr(uint16_t address) {
-	return &mem[address];
+uint8_t inline & Emulator::Address_abs_ptr(uint16_t address) {
+        return mem[address];
 }
 
-uint8_t inline * Emulator::Address_abs_x_ptr(uint16_t address) {
-	return &mem[(address+x)];
+uint8_t inline &Emulator::Address_abs_x_ptr(uint16_t address) {
+        return mem[(address+x)];
 }
 
 uint8_t inline Emulator::Address_zp(uint8_t zero_addr) {
@@ -805,15 +805,15 @@ void Emulator::ExecuteInst_and_ind_y()  //31", "SKIP", "REG", "OFFS")
 	throw misc::Panic("Unimplemented instruction");
 }
 
-void Emulator::Ins_asl(uint8_t *src)  //0A", "SKIP", "SKIP", "SKIP")
+void Emulator::Ins_asl(uint8_t &src)  //0A", "SKIP", "SKIP", "SKIP")
 {
 	// std::cout << "Pre  Shift Accumulator = " << std::bitset<8>(ac) << std::endl;
-	SetFlag((*src & 0x80),FLAG_CARRY);
-	*src <<= 1;
-	*src &= 0xFF;
+        SetFlag((src & 0x80),FLAG_CARRY);
+        src <<= 1;
+        src &= 0xFF;
 	// std::cout << "Post Shift Accumulator = " << std::bitset<8>(ac) << std::endl;
-	SetFlag((*src & 0x80),FLAG_NEGATIVE);
-	SetFlag(!*src,FLAG_ZERO);
+        SetFlag((src & 0x80),FLAG_NEGATIVE);
+        SetFlag(!src,FLAG_ZERO);
 	// std::cout << "Status Register: SV BDIZC" << std::endl;
 	// std::cout << "Status Register: " << std::bitset<8>(sr) << std::endl;
 
@@ -1305,9 +1305,9 @@ void Emulator::Ins_inc_y()  //C8", "SKIP", "SKIP", "SKIP")
     SetFlag((!y), FLAG_ZERO);
 }
 
-void Emulator::Ins_rol(uint8_t *src)  //2A", "SKIP", "SKIP", "SKIP")
+void Emulator::Ins_rol(uint8_t &src)  //2A", "SKIP", "SKIP", "SKIP")
 {
-	uint16_t tempValue = (uint16_t) *src;
+        uint16_t tempValue = (uint16_t) src;
     tempValue <<= 1;
     if (TestFlag(FLAG_CARRY)) {
     	tempValue |= 0x01;
@@ -1316,7 +1316,7 @@ void Emulator::Ins_rol(uint8_t *src)  //2A", "SKIP", "SKIP", "SKIP")
     tempValue &= 0xFF;
     SetFlag((tempValue & 0x80), FLAG_NEGATIVE);
     SetFlag((!tempValue), FLAG_ZERO);
-    *src = tempValue;
+    src = tempValue;
 }
 
 void Emulator::Ins_rol_acc()  //2A", "SKIP", "SKIP", "SKIP")
