@@ -159,8 +159,9 @@ uint8_t inline & Emulator::Address_y_ptr() {
         return y;
 }
 
-uint8_t inline & Emulator::Address_imm_ptr(uint8_t imm) {
-        return imm;
+uint8_t inline & Emulator::Address_imm_ptr() {
+		//std::cout << (int) imm << std::endl;
+        return mem[++pc];
 }
 
 uint8_t inline & Emulator::Address_zp_ptr(uint8_t zero_addr) {
@@ -266,7 +267,9 @@ bool Emulator::Decode(){
                   << std::setfill('0') << std::setw(2) << (int) y << " P:"
                   << std::setfill('0') << std::setw(2) << (int) sr << " SP:"
                   << std::setfill('0') << std::setw(2) << (int) sp << std::endl;
-
+  	MemoryWatch(0x0000);
+  	MemoryWatch(0x0010);
+  	MemoryWatch(0x0011);
 	switch(opcode) {
 		case 0x00:
 			return false;
@@ -345,7 +348,7 @@ bool Emulator::Decode(){
 			Ins_plp();
 			break;
 		case 0x29:
-			Ins_and(Address_imm_ptr(ReadMem(++pc)));
+			Ins_and(Address_imm_ptr());
 			break;
 		case 0x2A:
 			Ins_rol(Address_acc_ptr());
@@ -396,7 +399,7 @@ bool Emulator::Decode(){
 			Ins_pha();
 			break;
 		case 0x49:
-			Ins_eor(Address_imm_ptr(ReadMem(++pc)));
+			Ins_eor(Address_imm_ptr());
 			break;
 		case 0x4A:
 			Ins_lsr(Address_acc_ptr());
@@ -449,7 +452,7 @@ bool Emulator::Decode(){
 			Ins_pla();
 			break;
 		case 0x69:
-            Ins_adc(Address_imm_ptr(ReadMem(++pc)));
+            Ins_adc(Address_imm_ptr());
 			break;
 		case 0x6A:
 			Ins_ror(Address_acc_ptr());
@@ -498,6 +501,7 @@ bool Emulator::Decode(){
             Ins_sta(Address_zp_ptr(ReadMem(++pc)));
 			break;
 		case 0x86:
+			//std::
 			Ins_stx_zp(ReadMem(++pc));
 			break;
 		case 0x88:
@@ -532,13 +536,14 @@ bool Emulator::Decode(){
 			Ins_sta(Address_abs_x_ptr(ReadTwoBytes()));
 			break;
 		case 0xA0:
-			Ins_ldy(Address_imm_ptr(ReadMem(++pc))); // Tested
+			Ins_ldy(Address_imm_ptr()); // Tested
 			break;
 		case 0xA1:
 			Ins_lda(Address_ind_x_ptr(ReadMem(++pc)));
 			break;
 		case 0xA2:
-			Ins_ldx(Address_imm_ptr(ReadMem(++pc))); // Tested
+			std::cout << (int) ReadMem(pc+1) << std::endl;
+			Ins_ldx(Address_imm_ptr()); // Tested
 			break;
 		case 0xA4:
 			Ins_ldy(Address_zp_ptr(ReadMem(++pc)));
@@ -553,7 +558,7 @@ bool Emulator::Decode(){
 			Ins_tay(); // Tested
 			break;
 		case 0xA9:
-			Ins_lda(Address_imm_ptr(ReadMem(++pc))); // Tested
+			Ins_lda(Address_imm_ptr()); // Tested
 			break;
 		case 0xAA:
 			Ins_tax();
@@ -591,7 +596,7 @@ bool Emulator::Decode(){
 			break;
 		case 0xC0:
 			//std::cout << "Compare Y to immediate" << std::endl;
-			Ins_cpy(Address_imm_ptr(ReadMem(++pc))); // Tested
+			Ins_cpy(Address_imm_ptr()); // Tested
 			break;
 		case 0xC1:
             Ins_cmp(Address_ind_y_ptr(ReadMem(++pc)));
@@ -611,7 +616,7 @@ bool Emulator::Decode(){
 			Ins_inc(Address_y_ptr());
 			break;
 		case 0xC9:
-			Ins_cmp(Address_imm_ptr(ReadMem(++pc)));
+			Ins_cmp(Address_imm_ptr());
 			break;
 		case 0xCA:
 			Ins_dec(Address_x_ptr()); // Tested
@@ -652,7 +657,7 @@ bool Emulator::Decode(){
 			Ins_dec(Address_abs_x_ptr(ReadTwoBytes()));
 			break;
 		case 0xE0:
-			Ins_cpx(Address_imm_ptr(ReadMem(++pc)));
+			Ins_cpx(Address_imm_ptr());
 			break;
 		case 0xE1:
 			Ins_sbc(Address_ind_x_ptr(ReadMem(++pc)));
@@ -672,7 +677,7 @@ bool Emulator::Decode(){
 			Ins_inc(Address_x_ptr());
 			break;
 		case 0xE9:
-			Ins_sbc(Address_imm_ptr(ReadMem(++pc)));
+			Ins_sbc(Address_imm_ptr());
 			break;
 		case 0xEA:
 			//NOP
@@ -708,6 +713,7 @@ bool Emulator::Decode(){
 			break;
 		case 0xFD:
 			Ins_sbc(Address_abs_x_ptr(ReadTwoBytes()));
+			break;
 		case 0xFE:
 			Ins_inc(Address_abs_x_ptr(ReadTwoBytes()));
 			break;
@@ -823,7 +829,9 @@ void Emulator::Ins_jmp_abs(uint16_t destination) {
 }
 
 void Emulator::Ins_ldx(uint8_t & value) {
+	std::cout << (int) value << std::endl;
 	x = value;
+	std::cout << (int) x << std::endl;
 	SetFlag((x & 0x80),FLAG_NEGATIVE);
 	SetFlag(!x,FLAG_ZERO);
 }

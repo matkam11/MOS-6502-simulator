@@ -101,7 +101,7 @@ public:
         uint8_t inline & Address_acc_ptr();
         uint8_t inline & Address_x_ptr();
         uint8_t inline & Address_y_ptr();
-        uint8_t inline & Address_imm_ptr(uint8_t imm);
+        uint8_t inline & Address_imm_ptr();
         uint8_t inline & Address_zp_ptr(uint8_t zero_addr);
         uint8_t inline & Address_zp_x_ptr(uint8_t zero_addr);
         uint8_t inline & Address_abs_ptr(uint16_t address);
