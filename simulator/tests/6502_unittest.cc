@@ -90,18 +90,18 @@ TEST(instructions, Stack_Register) {
     EXPECT_EQ(0b00100100, Emulator::getInstance().sr);
     Emulator::getInstance().SetFlag(1, FLAG_CARRY);
     Emulator::getInstance().Ins_php();
-        EXPECT_EQ(0b00100101, Emulator::getInstance().ReadMem(0x01FF));
+    EXPECT_EQ(0b00100101, Emulator::getInstance().ReadMem(0x01FF));
 
-        Emulator::getInstance().x = 0x40;
-        Emulator::getInstance().Ins_txs_x_sp();
-        EXPECT_EQ(0x40, Emulator::getInstance().ReadMem(0x01FE));
+    Emulator::getInstance().x = 0x40;
+    Emulator::getInstance().Ins_txs_x_sp();
+    EXPECT_EQ(0x40, Emulator::getInstance().ReadMem(0x01FE));
 
-        Emulator::getInstance().SetFlag(1, FLAG_DECIMAL);
-        Emulator::getInstance().Ins_cld();
-        EXPECT_EQ(0, Emulator::getInstance().TestFlag(FLAG_DECIMAL));
+    Emulator::getInstance().SetFlag(1, FLAG_DECIMAL);
+    Emulator::getInstance().Ins_cld();
+    EXPECT_EQ(0, Emulator::getInstance().TestFlag(FLAG_DECIMAL));
 
-        Emulator::getInstance().Ins_cld();
-        EXPECT_EQ(0, Emulator::getInstance().TestFlag(FLAG_DECIMAL));
+    Emulator::getInstance().Ins_cld();
+    EXPECT_EQ(0, Emulator::getInstance().TestFlag(FLAG_DECIMAL));
 }
 
 
