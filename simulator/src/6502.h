@@ -187,7 +187,7 @@ public:
         void Ins_clv();  // "0xB8", "SKIP", "SKIP", "SKIP");
         void Ins_cld();  // "0xD8", "SKIP", "SKIP", "SKIP");
         void Ins_sed();  // "0xD8", "SKIP", "SKIP", "SKIP");
-        void ExecuteInst_inc_zp();  // "0xE6", "SKIP", "REG", "SKIP");
+        void Ins_inc(uint8_t *src);  // "0xE6", "SKIP", "REG", "SKIP");
         void ExecuteInst_inc_zp_x();  // "0xF6", "SKIP", "REG", "OFFS");
         void ExecuteInst_inc_abs();  // "0xEE", "SKIP", "REG", "SKIP");
         void ExecuteInst_inc_abs_x();  // "0xFE", "SKIP", "REG", "OFFS");

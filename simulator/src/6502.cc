@@ -468,7 +468,7 @@ bool Emulator::Decode(){
 			Ins_cpy_imm(ReadMem(++pc)); // Tested
 			break;
 		case 0xC1:
-                        Ins_cmp_imm(Address_ind_y(ReadMem(++pc)));
+            Ins_cmp_imm(Address_ind_y(ReadMem(++pc)));
 			break;
 		case 0xC4:
 			Ins_cpy_imm(Address_zp(ReadMem(++pc)));
@@ -506,9 +506,11 @@ bool Emulator::Decode(){
 		case 0xE5:
 			Ins_sbc_imm(Address_zp(ReadMem(++pc)));
 			break;
-                //case 0xE6:
-                        //Ins_inc_imm(Address_zp(ReadMem(++pc)));
-                //        break;
+        case 0xE6:
+        	std::cout << (int) ReadMem((pc+1)) << std::endl;
+			Ins_inc(Address_zp_ptr(ReadMem(++pc)));
+        	std::cout << (int) ReadMem((pc)) << std::endl;
+			break;
 		case 0xE8:
 			Ins_inx();
 			break;
@@ -1186,9 +1188,13 @@ void Emulator::Ins_sed()  //F8", "SKIP", "SKIP", "SKIP")
 }
 
 
-void Emulator::ExecuteInst_inc_zp()  //E6", "SKIP", "REG", "SKIP")
+void Emulator::Ins_inc(uint8_t *src)  //E6", "SKIP", "REG", "SKIP")
 {
-	throw misc::Panic("Unimplemented instruction");
+	uint8_t value = *src;
+	std::cout << (int) value << std::endl;
+	SetFlag((value & 0x80), FLAG_NEGATIVE);
+    SetFlag((!value), FLAG_ZERO);
+    *src = value;
 }
 
 
