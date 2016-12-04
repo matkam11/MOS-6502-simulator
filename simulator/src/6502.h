@@ -20,12 +20,43 @@
 #define FLAG_CARRY 0x01
 
 #include <stdint.h>
+#include "String.h"
+
 // set if memory was modified during processing of the last instruction
 #define EMU_FLAG_DIRTY 0x01
 // set if the emulator should wait for an interrupt before continuing
 #define EMU_FLAG_WAIT_FOR_INTERRUPT 0x02
 class Emulator {
-   public:
+
+/*Singleton approach for this class-------------------------------------------*/
+public:
+    static Emulator& getInstance()
+    {
+        static Emulator instance;
+        return instance;
+    }
+private:
+    Emulator();
+    Emulator(Emulator const&);
+    void operator=(Emulator const&);
+
+    Emulator(uint16_t pc_start);
+
+public:
+    //
+    // Static fields
+    //
+
+    // Base address to start execution
+    static uint16_t base_addr;
+
+    // Show emu help message
+    static bool help;
+
+    // Message to display with '--emu-help'
+    static const std::string help_message;
+
+
     uint16_t pc;
     uint8_t x, y;
     uint8_t sp;
@@ -39,18 +70,25 @@ class Emulator {
     // the opcode of the last instruction run. for debugging only.
     uint8_t last_opcode;
 
-    Emulator(uint16_t pc_start);
     uint16_t ReadTwoBytes();
     bool Decode();
     void SetFlag(bool set, uint8_t Flag);
+    void SetBaseAddr(const uint16_t &pc_start);
+    uint16_t getPC();
+    void SetPC(const uint16_t &pc_pos);
     bool TestFlag(uint8_t Flag);
 
     void StackPush(uint8_t byte);
     uint8_t StackPop();
     void PrintStack();
+    void PrintMem();
     
     void WriteMem(uint16_t address, uint8_t value);
     uint8_t ReadMem(uint16_t address);
+
+    // Command line options for EMULATOR
+    void RegisterOptions();
+    void ProcessOptions();
 
 	uint8_t inline * Address_acc_ptr();
 	uint8_t inline * Address_zp_ptr(uint8_t zero_addr);
