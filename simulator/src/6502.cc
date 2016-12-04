@@ -159,6 +159,10 @@ uint8_t inline &Emulator::Address_abs_x_ptr(uint16_t address) {
         return mem[(address+x)];
 }
 
+uint8_t inline &Emulator::Address_abs_y_ptr(uint16_t address) {
+        return mem[(address+y)];
+}
+
 uint8_t inline Emulator::Address_zp(uint8_t zero_addr) {
 	return Emulator::ReadMem(zero_addr);
 }
@@ -336,10 +340,10 @@ bool Emulator::Decode(){
 			Ins_rts(); // Tested?
 			break;
 		case 0x61:
-			Ins_adc_ind_x(ReadMem(++pc));
+                        Ins_adc(Address_ind_x(ReadMem(++pc)));
 			break;
 		case 0x65:
-			Ins_adc_imm(Address_zp(ReadMem(++pc)));
+                        Ins_adc(Address_zp_ptr(ReadMem(++pc)));
 			break;
 		case 0x66:
 			Ins_ror_zp(ReadMem(++pc));
@@ -348,7 +352,7 @@ bool Emulator::Decode(){
 			Ins_pla();
 			break;
 		case 0x69:
-			Ins_adc_imm(ReadMem(++pc));
+                        Ins_adc(ReadMem(++pc));
 			break;
 		case 0x6A:
 			Ins_ror_acc();
@@ -363,13 +367,13 @@ bool Emulator::Decode(){
 			Ins_sei();
 			break;
 		case 0x81:
-			Ins_sta_ind_x(ReadMem(++pc));
+                        Ins_sta(Address_ind_x(ReadMem(++pc)));
 			break;
 		case 0x84:
 			Ins_sty_zp(ReadMem(++pc));
 		 	break;
 		case 0x85:
-			Ins_sta_zp(ReadMem(++pc));
+                        Ins_sta(Address_zp_ptr(ReadMem(++pc)));
 			break;
 		case 0x86:
 			Ins_stx_zp(ReadMem(++pc));
@@ -385,7 +389,7 @@ bool Emulator::Decode(){
 			Ins_sty_abs(ReadTwoBytes());
 			break;
 		case 0x8D:
-			Ins_sta_abs(ReadTwoBytes());
+                        Ins_sta(ReadTwoBytes());
 			break;
 		case 0x8E:
 			Ins_stx_abs(ReadTwoBytes());
@@ -394,7 +398,7 @@ bool Emulator::Decode(){
 			Ins_bcc(ReadMem(++pc));
 			break;
 		case 0x91:
-			Ins_sta_ind_y(ReadMem(++pc));
+                        Ins_sta(Address_ind_y(ReadMem(++pc)));
 			break;
 		case 0x98:
 			Ins_tya();
@@ -403,7 +407,7 @@ bool Emulator::Decode(){
 			Ins_txs_x_sp(); // Tested
 			break;
 		case 0x9D:
-			Ins_sta_abs_x(ReadTwoBytes());
+                        Ins_sta(Address_ind_y(ReadTwoBytes()));
 			break;
 		case 0xA0:
 			Ins_ldy_imm(ReadMem(++pc)); // Tested
@@ -581,7 +585,7 @@ void Emulator::WriteMem(uint16_t address, uint8_t value) {
     mem[address] = value;
 }
 
-uint8_t Emulator::ReadMem(uint16_t address) {
+uint8_t& Emulator::ReadMem(uint16_t address) {
 	//std::cout << "Reading mem at address: " << address << std::endl;
 	return(mem[address]);
 }
@@ -655,7 +659,7 @@ void Emulator::Ins_lda_imm(uint8_t value) {
 	SetFlag(!ac,FLAG_ZERO);
 }
 
-void Emulator::Ins_adc_imm(uint8_t value)  //69", "IME", "SKIP", "SKIP")
+void Emulator::Ins_adc(const uint8_t& value)  //69", "IME", "SKIP", "SKIP")
 {
 	uint temp = value + ac + TestFlag(FLAG_CARRY);
 	SetFlag(!(temp & 0xFF),FLAG_ZERO);
@@ -1528,62 +1532,9 @@ void Emulator::ExecuteInst_sbc_ind_y()  //F1", "SKIP", "REG", "OFFS")
 	throw misc::Panic("Unimplemented instruction");
 }
 
-
-void Emulator::Ins_sta_zp(uint8_t zero_addr)  //85", "SKIP", "REG", "SKIP")
+void Emulator::Ins_sta(const uint16_t& address)  //8D", "SKIP", "REG", "SKIP")
 {
-	std::cout << "Storing Value " << (int) ac << " To address " << (int) zero_addr << std::endl;
-	Emulator::WriteMem(zero_addr, ac);
-}
-
-
-void Emulator::ExecuteInst_sta_zp_x()  //95", "SKIP", "REG", "OFFS")
-{
-	throw misc::Panic("Unimplemented instruction");
-}
-
-
-void Emulator::Ins_sta_abs(uint16_t address)  //8D", "SKIP", "REG", "SKIP")
-{
-	WriteMem(address, ac);
-}
-
-
-void Emulator::Ins_sta_abs_x(uint16_t address)  //9D", "SKIP", "REG", "OFFS")
-{
-	uint16_t addr = (address + x);
-	Emulator::WriteMem(addr, ac);
-}
-
-
-void Emulator::ExecuteInst_sta_abs_y()  //99", "SKIP", "REG", "OFFS")
-{
-	throw misc::Panic("Unimplemented instruction");
-}
-
-
-void Emulator::Ins_sta_ind_x(uint8_t start_address)  //81", "SKIP", "REG", "OFFS")
-{
-	uint8_t lsb,msb;
-	uint16_t address;
-    start_address += x;
-	lsb = ReadMem(start_address++);
-	msb = ReadMem(start_address);
-
-    address = ((msb << 8 ) | lsb);
-	Emulator::WriteMem(address, ac);
-}
-
-
-void Emulator::Ins_sta_ind_y(uint8_t start_address)  //91", "SKIP", "REG", "OFFS")
-{
-	uint8_t lsb,msb;
-	uint16_t address;
-	lsb = ReadMem(start_address++);
-	msb = ReadMem(start_address);
-
-    address = ((msb << 8 ) | lsb);
-    address += y;
-	Emulator::WriteMem(address, ac);
+        WriteMem(address, ac);
 }
 
 
