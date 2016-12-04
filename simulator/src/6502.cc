@@ -267,9 +267,7 @@ bool Emulator::Decode(){
                   << std::setfill('0') << std::setw(2) << (int) y << " P:"
                   << std::setfill('0') << std::setw(2) << (int) sr << " SP:"
                   << std::setfill('0') << std::setw(2) << (int) sp << std::endl;
-  	MemoryWatch(0x0000);
-  	MemoryWatch(0x0010);
-  	MemoryWatch(0x0011);
+  	MemoryWatch(0x0678);
 	switch(opcode) {
 		case 0x00:
 			return false;
@@ -360,7 +358,7 @@ bool Emulator::Decode(){
 			Ins_and(Address_abs_ptr(ReadTwoBytes()));
 			break;
 		case 0x2E:
-			Ins_rol(Address_abs_x_ptr(ReadMem(++pc)));
+			Ins_rol(Address_abs_x_ptr(ReadTwoBytes()));
 			break;
 		case 0x30:
 			Ins_bmi(ReadMem(++pc));
@@ -595,7 +593,6 @@ bool Emulator::Decode(){
 			Ins_lda(Address_abs_x_ptr(ReadTwoBytes())); // Tested
 			break;
 		case 0xC0:
-			//std::cout << "Compare Y to immediate" << std::endl;
 			Ins_cpy(Address_imm_ptr()); // Tested
 			break;
 		case 0xC1:
@@ -843,9 +840,13 @@ void Emulator::Ins_ldy(uint8_t & value) {
 }
 
 void Emulator::Ins_lda(uint8_t & value) {
+	std::cout << (int) value << std::endl;
 	ac = value;
+	std::cout << (int) value << std::endl;
 	SetFlag((ac & 0x80),FLAG_NEGATIVE);
 	SetFlag(!ac,FLAG_ZERO);
+	std::cout << (int) value << std::endl;
+
 }
 
 void Emulator::Ins_adc(uint8_t& value)  //69", "IME", "SKIP", "SKIP")
