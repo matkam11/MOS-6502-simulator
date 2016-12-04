@@ -468,7 +468,7 @@ bool Emulator::Decode(){
 			Ins_cpy_imm(ReadMem(++pc)); // Tested
 			break;
 		case 0xC1:
-                        //Ins_cmp_ind_x(ReadMem(++pc));
+                        Ins_cmp_imm(Address_ind_y(ReadMem(++pc)));
 			break;
 		case 0xC4:
 			Ins_cpy_imm(Address_zp(ReadMem(++pc)));
@@ -506,6 +506,9 @@ bool Emulator::Decode(){
 		case 0xE5:
 			Ins_sbc_imm(Address_zp(ReadMem(++pc)));
 			break;
+                //case 0xE6:
+                        //Ins_inc_imm(Address_zp(ReadMem(++pc)));
+                //        break;
 		case 0xE8:
 			Ins_inx();
 			break;
@@ -1179,7 +1182,7 @@ void Emulator::Ins_cld()  //D8", "SKIP", "SKIP", "SKIP")
 
 void Emulator::Ins_sed()  //F8", "SKIP", "SKIP", "SKIP")
 {
-	SetFlag(1, FLAG_DECIMAL);
+    SetFlag(1, FLAG_DECIMAL);
 }
 
 
