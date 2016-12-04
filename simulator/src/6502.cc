@@ -253,7 +253,12 @@ bool Emulator::Decode(){
 	//PrintStack();
 	uint8_t opcode = ReadMem(++pc);
 	std::cout << std::hex << "Begin Decode... Opcode " << (int) ReadMem(pc) <<" @" << pc << "         ";
-	std::cout  << "A: " <<(int) ac << " X: " << (int) x << " Y: " << (int) y << " SR: " << (int) sr << " SP: " << (int) sp << std::endl;
+        std::cout << std::uppercase<< std::hex << "A:"
+                  << std::setfill('0') << std::setw(2) <<(int) ac << " X:"
+                  << std::setfill('0') << std::setw(2) << (int) x << " Y:"
+                  << std::setfill('0') << std::setw(2) << (int) y << " P:"
+                  << std::setfill('0') << std::setw(2) << (int) sr << " SP:"
+                  << std::setfill('0') << std::setw(2) << (int) sp << std::endl;
 
 	switch(opcode) {
 		case 0x00:
@@ -434,8 +439,8 @@ bool Emulator::Decode(){
 			Ins_sty_abs(ReadTwoBytes());
 			break;
 		// case 0x8D:
-  //           Ins_sta(Address_abs_ptr(ReadTwoBytes()));
-			break;
+        //	 Ins_sta(Address_abs_ptr(ReadTwoBytes()));
+		//	 break;
 		case 0x8E:
 			Ins_stx_abs(ReadTwoBytes());
 			break;
@@ -452,7 +457,7 @@ bool Emulator::Decode(){
 			Ins_txs_x_sp(); // Tested
 			break;
 		// case 0x9D:
-  //           Ins_sta(Address_ind_y(ReadTwoBytes()));
+  //           Ins_sta(Address_abs_x(ReadTwoBytes()));
 			break;
 		case 0xA0:
 			Ins_ldy_imm(ReadMem(++pc)); // Tested
@@ -654,7 +659,7 @@ void Emulator::WriteMem(uint16_t address, uint8_t value) {
     mem[address] = value;
 }
 
-uint8_t& Emulator::ReadMem(uint16_t address) {
+uint8_t Emulator::ReadMem(uint16_t address) {
 	//std::cout << "Reading mem at address: " << address << std::endl;
 	return(mem[address]);
 }

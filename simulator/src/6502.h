@@ -92,7 +92,7 @@ public:
     void PrintMem();
 
     void WriteMem(uint16_t address, uint8_t value);
-    uint8_t &ReadMem(uint16_t address);
+    uint8_t ReadMem(uint16_t address);
 
     // Command line options for EMULATOR
     void RegisterOptions();
@@ -241,7 +241,11 @@ public:
         void ExecuteInst_sbc_ind_y();  // "0xF1", "SKIP", "REG", "OFFS");
         void Ins_sta(uint8_t & address);  // "0x8D", "SKIP", "REG", "SKIP");
         void ExecuteInst_sta_zp_x();  // "0x95", "SKIP", "REG", "OFFS");
+        void Ins_sta_abs(uint16_t address);  // "0x8D", "SKIP", "REG", "SKIP");
+        void Ins_sta_abs_x(uint16_t address);  // "0x9D", "SKIP", "REG", "OFFS");
         void ExecuteInst_sta_abs_y();  // "0x99", "SKIP", "REG", "OFFS");
+        void Ins_sta_ind_x(uint8_t start_address);  // "0x81", "SKIP", "REG", "OFFS");
+        void Ins_sta_ind_y(uint8_t start_address);  // "0x91", "SKIP", "REG", "OFFS");
         void Ins_txs_x_sp();  // "0x9A", "SKIP", "SKIP", "SKIP");
         void Ins_tsx();  // "0xBA", "SKIP", "SKIP", "SKIP");
         void Ins_pha();  // "0x48", "SKIP", "SKIP", "SKIP");
