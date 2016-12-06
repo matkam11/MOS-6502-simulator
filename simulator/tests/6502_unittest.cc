@@ -273,22 +273,22 @@ TEST(instructions, Branches) {
     Emulator::getInstance().Ins_bpl(0x20);
     EXPECT_EQ(0x60, Emulator::getInstance().pc);
     Emulator::getInstance().Ins_bpl(0xB0);
-    EXPECT_EQ(0x10, Emulator::getInstance().pc);
+    EXPECT_EQ(0x30, Emulator::getInstance().pc);
 
     Emulator::getInstance().SetFlag(1, FLAG_NEGATIVE);
     Emulator::getInstance().Ins_bpl(0x20);
-    EXPECT_EQ(0x10, Emulator::getInstance().pc);
+    EXPECT_EQ(0x30, Emulator::getInstance().pc);
     Emulator::getInstance().SetFlag(0, FLAG_NEGATIVE);
 
     Emulator::getInstance().pc = 0x2040;
     Emulator::getInstance().Ins_bpl(0x20);
     EXPECT_EQ(0x2060, Emulator::getInstance().pc);
     Emulator::getInstance().Ins_bpl(0xB0);
-    EXPECT_EQ(0x2010, Emulator::getInstance().pc);
+    EXPECT_EQ(0x2030, Emulator::getInstance().pc);
 
     Emulator::getInstance().SetFlag(1, FLAG_NEGATIVE);
     Emulator::getInstance().Ins_bpl(0x20);
-    EXPECT_EQ(0x2010, Emulator::getInstance().pc);
+    EXPECT_EQ(0x2030, Emulator::getInstance().pc);
     Emulator::getInstance().SetFlag(0, FLAG_NEGATIVE);
 
     // Test Ins_bne()
@@ -296,22 +296,22 @@ TEST(instructions, Branches) {
     Emulator::getInstance().Ins_bne(0x20);
     EXPECT_EQ(0x60, Emulator::getInstance().pc);
     Emulator::getInstance().Ins_bne(0xB0);
-    EXPECT_EQ(0x10, Emulator::getInstance().pc);
+    EXPECT_EQ(0x110, Emulator::getInstance().pc);
 
     Emulator::getInstance().SetFlag(1, FLAG_ZERO);
     Emulator::getInstance().Ins_bne(0x20);
-    EXPECT_EQ(0x10, Emulator::getInstance().pc);
+    EXPECT_EQ(0x110, Emulator::getInstance().pc);
     Emulator::getInstance().SetFlag(0, FLAG_ZERO);
 
     Emulator::getInstance().pc = 0x2040;
     Emulator::getInstance().Ins_bne(0x20);
     EXPECT_EQ(0x2060, Emulator::getInstance().pc);
     Emulator::getInstance().Ins_bne(0xB0);
-    EXPECT_EQ(0x2010, Emulator::getInstance().pc);
+    EXPECT_EQ(0x2110, Emulator::getInstance().pc);
 
     Emulator::getInstance().SetFlag(1, FLAG_ZERO);
     Emulator::getInstance().Ins_bne(0x20);
-    EXPECT_EQ(0x2010, Emulator::getInstance().pc);
+    EXPECT_EQ(0x2110, Emulator::getInstance().pc);
     Emulator::getInstance().SetFlag(0, FLAG_ZERO);
 
     // Test Ins_beq()
@@ -320,22 +320,22 @@ TEST(instructions, Branches) {
     Emulator::getInstance().Ins_beq(0x20);
     EXPECT_EQ(0x60, Emulator::getInstance().pc);
     Emulator::getInstance().Ins_beq(0xB0);
-    EXPECT_EQ(0x10, Emulator::getInstance().pc);
+    EXPECT_EQ(0x30, Emulator::getInstance().pc);
 
     Emulator::getInstance().SetFlag(0, FLAG_ZERO);
     Emulator::getInstance().Ins_beq(0x20);
-    EXPECT_EQ(0x10, Emulator::getInstance().pc);
+    EXPECT_EQ(0x30, Emulator::getInstance().pc);
     Emulator::getInstance().SetFlag(1, FLAG_ZERO);
 
     Emulator::getInstance().pc = 0x2040;
     Emulator::getInstance().Ins_beq(0x20);
     EXPECT_EQ(0x2060, Emulator::getInstance().pc);
     Emulator::getInstance().Ins_beq(0xB0);
-    EXPECT_EQ(0x2010, Emulator::getInstance().pc);
+    EXPECT_EQ(0x2030, Emulator::getInstance().pc);
 
     Emulator::getInstance().SetFlag(0, FLAG_ZERO);
     Emulator::getInstance().Ins_beq(0x20);
-    EXPECT_EQ(0x2010, Emulator::getInstance().pc);
+    EXPECT_EQ(0x2030, Emulator::getInstance().pc);
 }
 
 
