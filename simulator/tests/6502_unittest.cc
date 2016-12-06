@@ -84,10 +84,44 @@ TEST(emulator_meta, Flags) {
     EXPECT_EQ(0,Emulator::getInstance().TestFlag(FLAG_CARRY));
 }
 
-TEST(instructions, Status_Register) {
+TEST(emulator_meta, Addressing_Mode) {
+    Emulator::getInstance().SetStartAddr(0xC000);
+    Emulator::getInstance().WriteMem(0xC001, 0xFA);
+    Emulator::getInstance().WriteMem(0xC002, 0x10);
+    Emulator::getInstance().WriteMem(0xC003, 0x10);
+    Emulator::getInstance().WriteMem(0xC004, 0xFF);
+    Emulator::getInstance().WriteMem(0xC005, 0x10);
+    Emulator::getInstance().WriteMem(0xC006, 0xFF);
+    Emulator::getInstance().WriteMem(0x0F, 0xF0);
+    Emulator::getInstance().WriteMem(0x10, 0x20);
+    Emulator::getInstance().WriteMem(0x1F, 0xF1);
+    Emulator::getInstance().WriteMem(0x20, 0x40);
+    Emulator::getInstance().WriteMem(0x30, 0x60);
+    Emulator::getInstance().WriteMem(0x40, 0x80);
+    Emulator::getInstance().WriteMem(0x50, 0xA0);
+    Emulator::getInstance().x = 0x10;
+    Emulator::getInstance().y = 0x20;
+    Emulator::getInstance().ac = 0x30;
 
-    Emulator emu = Emulator::getInstance();
-    emu.SetStartAddr(0x0000);
+    // Test Immediates
+    EXPECT_EQ(Emulator::getInstance().Address_x_ptr(), 0x10);
+    EXPECT_EQ(Emulator::getInstance().Address_y_ptr(), 0x20);
+    EXPECT_EQ(Emulator::getInstance().Address_acc_ptr(), 0x30);
+    EXPECT_EQ(Emulator::getInstance().Address_imm_ptr(), 0xFA);
+    // Test zp
+    EXPECT_EQ(Emulator::getInstance().Address_zp_ptr(), 0x20);
+    // Test X and test zp_x overflow
+    EXPECT_EQ(Emulator::getInstance().Address_zp_x_ptr(), 0x40);
+    EXPECT_EQ(Emulator::getInstance().Address_zp_x_ptr(), 0xF0);
+    // Test y and test zp_y overflow
+    EXPECT_EQ(Emulator::getInstance().Address_zp_y_ptr(), 0x60);
+    EXPECT_EQ(Emulator::getInstance().Address_zp_y_ptr(), 0xF1);
+
+
+}
+
+TEST(instructions, Status_Register) {
+    Emulator::getInstance().SetStartAddr(0x0000);
     EXPECT_EQ(0b00100100, Emulator::getInstance().sr);
     Emulator::getInstance().SetFlag(1, FLAG_CARRY);
     Emulator::getInstance().Ins_php();
@@ -125,7 +159,7 @@ TEST(instructions, Jumps) {
     EXPECT_EQ(0x2101, Emulator::getInstance().pc);
 }
 
-TEST(instructions, Math) {
+// TEST(instructions, Math) {
 
 //     Emulator::getInstance().SetStartAddr(0x0040);
 
@@ -214,7 +248,7 @@ TEST(instructions, Math) {
 //     EXPECT_EQ(0, Emulator::getInstance().TestFlag(FLAG_NEGATIVE));
 //     EXPECT_EQ(1, Emulator::getInstance().TestFlag(FLAG_CARRY));
 //     Emulator::getInstance().SetFlag(0, FLAG_CARRY);
-}
+// }
 
 TEST(instructions, Branches) {
 
@@ -288,6 +322,7 @@ TEST(instructions, Branches) {
     Emulator::getInstance().Ins_beq(0x20);
     EXPECT_EQ(0x2010, Emulator::getInstance().pc);
 }
+
 
 // TEST(instructions, Loads) {
 
