@@ -90,6 +90,16 @@ void Emulator::Reset()
     sp = 0xFD;
     interrupt_waiting = 0x00;
     memset(mem, 0xFF, MEMORY_SIZE);
+
+    x = 0x00;
+    y = 0x00;
+    ac= 0x00;
+    emu_flags=FLAG_INTERRUPT | 0x20;
+
+    // stores the address of memory modified by the last instruction
+    dirty_mem_addr=0x00;
+    // the opcode of the last instruction run. for debugging only.
+    last_opcode=0x00;
 }
 
 Emulator::Emulator():
