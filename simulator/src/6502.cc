@@ -177,7 +177,7 @@ uint8_t inline & Emulator::Address_zp_x_ptr() {
 
 uint8_t inline & Emulator::Address_zp_y_ptr() {
     	uint8_t zero_addr = ReadMem(++pc);
-        return mem[zero_addr+y];
+        return mem[((zero_addr+y)&0xff)];
 }
 
 uint8_t inline & Emulator::Address_abs_ptr() {
@@ -209,13 +209,15 @@ uint8_t inline &Emulator::Address_ind_x_ptr() {
 
 uint8_t inline & Emulator::Address_ind_y_ptr() {
 	uint8_t start_address = ReadMem(++pc);
+    std::cout << "Reading Start addr: " << (int) start_address << std::endl;
 	uint8_t lsb,msb;
 	uint16_t address;
 	lsb = ReadMem(start_address++);
 	msb = ReadMem(start_address);
-
+    std::cout << "Reading addr: " << (int) msb << " " << (int) lsb << std::endl;
     address = ((msb << 8 ) | lsb);
-    address += y;
+    //address += y;
+    std::cout << "Reading addr: " << (int) address << std::endl;
 	return mem[address];
 }
 
@@ -229,7 +231,18 @@ bool Emulator::Decode(){
                   << std::setfill('0') << std::setw(2) << (int) y << " P:"
                   << std::setfill('0') << std::setw(2) << (int) sr << " SP:"
                   << std::setfill('0') << std::setw(2) << (int) sp << std::endl;
-    MemoryWatch(0x0047);
+    MemoryWatch(0x0000);
+    MemoryWatch(0x0010);
+    MemoryWatch(0x0011);
+    MemoryWatch(0x0049);
+    MemoryWatch(0x0080);
+    MemoryWatch(0x0081); 
+    MemoryWatch(0x0200);       
+    MemoryWatch(0x0201);
+    MemoryWatch(0x0548);
+    MemoryWatch(0x0549);
+    MemoryWatch(0x0647);
+    MemoryWatch(0x0648);
 	switch(opcode) {
 		case 0x00:
 			return false;
@@ -1285,6 +1298,7 @@ void Emulator::Ins_beq(uint8_t rel_address)  //F0", "SKIP", "SKIP", "SKIP")
 
 void Emulator::Ins_cmp(uint8_t & value)  //C9", "IME", "SKIP", "SKIP")
 {
+	std::cout << "Value: " << (int)value << std::endl;
 	uint16_t result = ac - value;
 	SetFlag(((result) < 0x100) , FLAG_CARRY);
 	SetFlag((result & 0x80) , FLAG_NEGATIVE);
@@ -1561,9 +1575,13 @@ void Emulator::Ins_extra_lax(uint8_t & value) {
 }
 
 void Emulator::Ins_extra_axs(uint8_t & value) {
-	uint8_t result;
-	result = ac & x;
-	value = result;
+	uint8_t tempReg = sr;
+	Ins_stx(value);
+	Ins_pha();
+	Ins_and(value);
+	Ins_sta(value);
+	Ins_pla();
+	sr = tempReg;
 }
 
 void Emulator::Ins_extra_dcm(uint8_t & value) {
@@ -1601,6 +1619,7 @@ void Emulator::Ins_lsr(uint8_t & src)  //4A", "SKIP", "SKIP", "SKIP")
 
 void Emulator::Ins_extra_rra(uint8_t & value)
 {
+	std::cout << "Value: " << (int) value << std::endl;
 	Ins_ror(value);
 	Ins_adc(value);
 }

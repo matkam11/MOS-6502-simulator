@@ -80,6 +80,9 @@ Error.o : $(USER_DIR)/Error.cc $(USER_DIR)/Error.h
 String.o: $(USER_DIR)/String.cc $(USER_DIR)/String.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/String.cc
 
+CommandLine.o: $(USER_DIR)/String.cc $(USER_DIR)/CommandLine.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/CommandLine.cc
+
 Terminal.o: $(USER_DIR)/Terminal.cc $(USER_DIR)/Terminal.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/Terminal.cc
 
@@ -90,7 +93,7 @@ Terminal.o: $(USER_DIR)/Terminal.cc $(USER_DIR)/Terminal.h
                      $(USER_DIR)/6502.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(TEST_DIR)/6502_unittest.cc
 
-6502_unittest : Misc.o Error.o String.o Terminal.o 6502.o 6502_unittest.o gtest_main.a
+6502_unittest : Misc.o Error.o String.o Terminal.o CommandLine.o 6502.o 6502_unittest.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
 
 
