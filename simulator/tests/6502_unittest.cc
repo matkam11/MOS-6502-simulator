@@ -3,6 +3,8 @@
 //#include "Misc.h"
 // Test creating 6502 object
 TEST(emulator_object_test, Suceess) {
+
+     Emulator::getInstance().Reset();
   // This test is named "Negative", and belongs to the "FactorialTest"
   // test case.
     Emulator::getInstance().SetStartAddr(20);
@@ -12,6 +14,8 @@ TEST(emulator_object_test, Suceess) {
 
 
 TEST(emulator_meta, Memory) {
+
+     Emulator::getInstance().Reset();
   // This test is named "Negative", and belongs to the "FactorialTest"
   // test case.
 
@@ -22,6 +26,8 @@ TEST(emulator_meta, Memory) {
 }
 
 TEST(emulator_meta, Stack) {
+
+     Emulator::getInstance().Reset();
 
     Emulator::getInstance().SetStartAddr(0x0000);
 
@@ -40,13 +46,13 @@ TEST(emulator_meta, Stack) {
     //				 SP ^
     // Push CD
     // [0xFF .. 0xFF 0xCD 0xAB]
-    //			SP ^	 	 
+    //			SP ^
     // Pop CD, Returns CD
     // [0xFF .. 0xFF 0xCD 0xAB]
     //				 SP ^
     // Pop AB, Retruns AB
     // [0xFF .. 0xFF 0xCD 0xAB]
-    //			          SP ^	 	 
+    //			          SP ^
     EXPECT_EQ(0xFD, Emulator::getInstance().sp);
     Emulator::getInstance().StackPush(0xAB);
     EXPECT_EQ(0xFC, Emulator::getInstance().sp);
@@ -68,6 +74,8 @@ TEST(emulator_meta, Stack) {
 }
 
 TEST(emulator_meta, Flags) {
+
+     Emulator::getInstance().Reset();
 
     Emulator::getInstance().SetStartAddr(0x0000);
     EXPECT_EQ(0b00100100, Emulator::getInstance().sr);
@@ -116,11 +124,10 @@ TEST(emulator_meta, Addressing_Mode) {
     // Test y and test zp_y overflow
     EXPECT_EQ(Emulator::getInstance().Address_zp_y_ptr(), 0x60);
     EXPECT_EQ(Emulator::getInstance().Address_zp_y_ptr(), 0xF1);
-
-
 }
 
 TEST(instructions, Status_Register) {
+    Emulator::getInstance().Reset();
     Emulator::getInstance().SetStartAddr(0x0000);
     EXPECT_EQ(0b00100100, Emulator::getInstance().sr);
     Emulator::getInstance().SetFlag(1, FLAG_CARRY);
@@ -129,7 +136,7 @@ TEST(instructions, Status_Register) {
 
     Emulator::getInstance().x = 0x40;
     Emulator::getInstance().Ins_txs_x_sp();
-    EXPECT_EQ(0x40, Emulator::getInstance().ReadMem(0x01FC));
+    EXPECT_EQ(0x40, Emulator::getInstance().sp);
 
     Emulator::getInstance().SetFlag(1, FLAG_DECIMAL);
     Emulator::getInstance().Ins_cld();
@@ -142,24 +149,28 @@ TEST(instructions, Status_Register) {
 
 TEST(instructions, Jumps) {
 
+    Emulator::getInstance().Reset();
+
     Emulator::getInstance().SetStartAddr(0x20FF);
     EXPECT_EQ(0x20FF, Emulator::getInstance().pc);
     Emulator::getInstance().pc++;
     Emulator::getInstance().pc++;
     Emulator::getInstance().Ins_jsr(0x10FF);
-    EXPECT_EQ(0x10FF, Emulator::getInstance().pc);
-    EXPECT_EQ(0x21, Emulator::getInstance().ReadMem(0x1FF)); // Verify Stack
-    EXPECT_EQ(0x00, Emulator::getInstance().ReadMem(0x1FE)); //	Verift Stack
-    
+    EXPECT_EQ(0x10FE, Emulator::getInstance().pc);
+    EXPECT_EQ(0x21, Emulator::getInstance().ReadMem(0x1FD)); // Verify Stack
+    EXPECT_EQ(0x01, Emulator::getInstance().ReadMem(0x1FC)); //	Verift Stack
+
     Emulator::getInstance().Ins_jmp_abs(0x15FF);
-    EXPECT_EQ(0x15FF, Emulator::getInstance().pc);
+    EXPECT_EQ(0x15FE, Emulator::getInstance().pc);
 
     Emulator::getInstance().Ins_rts();
-    EXPECT_EQ(0xFF, Emulator::getInstance().sp);
+    EXPECT_EQ(0xFD, Emulator::getInstance().sp);
     EXPECT_EQ(0x2101, Emulator::getInstance().pc);
 }
 
 // TEST(instructions, Math) {
+
+//	 Emulator::getInstance().Reset();
 
 //     Emulator::getInstance().SetStartAddr(0x0040);
 
@@ -186,7 +197,7 @@ TEST(instructions, Jumps) {
 //     EXPECT_EQ(0x1F, Emulator::getInstance().x);
 //     EXPECT_EQ(0, Emulator::getInstance().TestFlag(FLAG_ZERO));
 //     EXPECT_EQ(0, Emulator::getInstance().TestFlag(FLAG_NEGATIVE));
- 
+
 //     Emulator::getInstance().x = 0x01;
 //     Emulator::getInstance().Ins_dex();
 //     EXPECT_EQ(0x00, Emulator::getInstance().x);
@@ -217,10 +228,12 @@ TEST(instructions, Jumps) {
 //     EXPECT_EQ(0x8F, Emulator::getInstance().y);
 //     EXPECT_EQ(0, Emulator::getInstance().TestFlag(FLAG_ZERO));
 //     EXPECT_EQ(1, Emulator::getInstance().TestFlag(FLAG_NEGATIVE));
-    
+
 // }
 
 // TEST(instructions, Compares) {
+
+//	 Emulator::getInstance().Reset();
 
 //     Emulator::getInstance().SetStartAddr(0x0040);
 
@@ -252,6 +265,8 @@ TEST(instructions, Jumps) {
 
 TEST(instructions, Branches) {
 
+    Emulator::getInstance().Reset();
+
     Emulator::getInstance().SetStartAddr(0x0040);
 
     // Test Ins_bpl() with 00XX and XXXX addresses. Second Byte should overflow;
@@ -264,7 +279,7 @@ TEST(instructions, Branches) {
     Emulator::getInstance().Ins_bpl(0x20);
     EXPECT_EQ(0x10, Emulator::getInstance().pc);
     Emulator::getInstance().SetFlag(0, FLAG_NEGATIVE);
- 
+
     Emulator::getInstance().pc = 0x2040;
     Emulator::getInstance().Ins_bpl(0x20);
     EXPECT_EQ(0x2060, Emulator::getInstance().pc);
@@ -287,7 +302,7 @@ TEST(instructions, Branches) {
     Emulator::getInstance().Ins_bne(0x20);
     EXPECT_EQ(0x10, Emulator::getInstance().pc);
     Emulator::getInstance().SetFlag(0, FLAG_ZERO);
- 
+
     Emulator::getInstance().pc = 0x2040;
     Emulator::getInstance().Ins_bne(0x20);
     EXPECT_EQ(0x2060, Emulator::getInstance().pc);
@@ -311,7 +326,7 @@ TEST(instructions, Branches) {
     Emulator::getInstance().Ins_beq(0x20);
     EXPECT_EQ(0x10, Emulator::getInstance().pc);
     Emulator::getInstance().SetFlag(1, FLAG_ZERO);
- 
+
     Emulator::getInstance().pc = 0x2040;
     Emulator::getInstance().Ins_beq(0x20);
     EXPECT_EQ(0x2060, Emulator::getInstance().pc);
@@ -325,6 +340,8 @@ TEST(instructions, Branches) {
 
 
 // TEST(instructions, Loads) {
+
+//	 Emulator::getInstance().Reset();
 
     // Emulator::getInstance().SetStartAddr(0x0000);
     // Emulator::getInstance().WriteMem(0x0020, 0x22);
@@ -432,6 +449,8 @@ TEST(instructions, Branches) {
 // }
 
 // TEST(instructions, Logical) {
+
+//	 Emulator::getInstance().Reset();
 
 //     Emulator::getInstance().SetStartAddr(0x0000);
 
@@ -587,6 +606,8 @@ TEST(instructions, Branches) {
 
 // TEST(instructions, Stores) {
 
+//	 Emulator::getInstance().Reset();
+
 //     Emulator::getInstance().SetStartAddr(0x0000);
 
 //     Emulator::getInstance().x = 0x22;
@@ -602,6 +623,8 @@ TEST(instructions, Branches) {
 // }
 
 // TEST(instructions, Transfers){
+
+//	 Emulator::getInstance().Reset();
 
 //     Emulator::getInstance().SetStartAddr(0x0000);
 

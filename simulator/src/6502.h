@@ -35,6 +35,9 @@ public:
         static Emulator instance;
         return instance;
     }
+
+    void Reset();
+
 private:
     Emulator();
     Emulator(Emulator const&);

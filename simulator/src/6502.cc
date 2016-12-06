@@ -83,15 +83,24 @@ Emulator::Emulator(uint16_t pc_start) {
 	memset(mem, 0xFF, MEMORY_SIZE);
 }
 
-Emulator::Emulator():
-          pc(start_addr)
-        , sp(0xFD)
-        , sr(FLAG_INTERRUPT | 0x20)
-        , interrupt_waiting(0x00)
-        , mem()
+void Emulator::Reset()
+{
+    pc = 0x0000;
+    sr = FLAG_INTERRUPT | 0x20;
+    sp = 0xFD;
+    interrupt_waiting = 0x00;
+    memset(mem, 0xFF, MEMORY_SIZE);
+}
 
-        {
-            memset(mem, 0xFF, MEMORY_SIZE);
+Emulator::Emulator():
+    pc(start_addr)
+  , sp(0xFD)
+  , sr(FLAG_INTERRUPT | 0x20)
+  , interrupt_waiting(0x00)
+  , mem()
+
+{
+    memset(mem, 0xFF, MEMORY_SIZE);
         }
 
 
