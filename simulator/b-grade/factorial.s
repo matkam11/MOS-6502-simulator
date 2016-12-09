@@ -10,60 +10,43 @@
 	.importzp	sp, sreg, regsave, regbank
 	.importzp	tmp1, tmp2, tmp3, tmp4, ptr1, ptr2, ptr3, ptr4
 	.macpack	longbranch
-	.export		_vectorAdd
+	.export		_factorial
 
 ; ---------------------------------------------------------------
-; void __near__ vectorAdd (int *, int *, int *, int)
+; void __near__ factorial (int, __near__ unsigned int *)
 ; ---------------------------------------------------------------
 
 .segment	"CODE"
 
-.proc	_vectorAdd: near
+.proc	_factorial: near
 
 .segment	"CODE"
 
 	jsr     pushax
 	jsr     decsp2
 	ldx     #$00
-	lda     #$00
+	lda     #$01
 	ldy     #$00
 	jsr     staxysp
 L0002:	ldy     #$01
 	jsr     ldaxysp
 	jsr     pushax
-	ldy     #$05
-	jsr     ldaxysp
-	jsr     tosltax
-	jne     L0005
-	jmp     L0003
-L0005:	ldy     #$05
-	jsr     ldaxysp
-	jsr     pushax
-	ldy     #$03
-	jsr     ldaxysp
-	jsr     aslax1
-	jsr     tosaddax
-	jsr     pushax
-	ldy     #$0B
-	jsr     ldaxysp
-	jsr     pushax
-	ldy     #$05
-	jsr     ldaxysp
-	jsr     aslax1
-	jsr     tosaddax
-	ldy     #$01
-	jsr     ldaxidx
-	jsr     pushax
-	ldy     #$0B
-	jsr     ldaxysp
-	jsr     pushax
 	ldy     #$07
 	jsr     ldaxysp
-	jsr     aslax1
-	jsr     tosaddax
+	jsr     tosuleax
+	jne     L0005
+	jmp     L0003
+L0005:	ldy     #$03
+	jsr     ldaxysp
+	jsr     pushax
+	ldy     #$05
+	jsr     ldaxysp
 	ldy     #$01
 	jsr     ldaxidx
-	jsr     tosaddax
+	jsr     pushax
+	ldy     #$05
+	jsr     ldaxysp
+	jsr     tosumulax
 	ldy     #$00
 	jsr     staxspidx
 	ldy     #$00
@@ -71,8 +54,7 @@ L0005:	ldy     #$05
 	lda     #$01
 	jsr     addeqysp
 	jmp     L0002
-L0003:	ldy     #$0A
-	jsr     addysp
+L0003:	jsr     incsp6
 	rts
 
 .endproc

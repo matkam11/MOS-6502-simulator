@@ -1,5 +1,5 @@
 
-void vectorAdd(int A[], int B[], int C[], int size)
+void vectorAdd(int A[], int B[], int C[], int	 size)
 {
 	int i;
 
